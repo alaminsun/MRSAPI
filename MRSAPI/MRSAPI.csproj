@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Gateway\DBConnection.cs" />
+    <Compile Remove="Repository\IRepository\INationalParkRepository.cs" />
+    <Compile Remove="Repository\IRepository\ITrailRepository.cs" />
+    <Compile Remove="Repository\IRepository\IUserRepository.cs" />
+    <Compile Remove="Repository\NationalParkRepository.cs" />
+    <Compile Remove="Repository\TrailRepository.cs" />
+    <Compile Remove="Repository\UserRepository.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.120" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+</Project>
