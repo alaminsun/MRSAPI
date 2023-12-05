@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Development\\MRSAPI\\MRSAPI\\MRSAPI.csproj": {}
+    "G:\\Project\\MRSAPI-master\\MRSAPI-master\\MRSAPI\\MRSAPI.csproj": {}
   },
   "projects": {
-    "F:\\Development\\MRSAPI\\MRSAPI\\MRSAPI.csproj": {
+    "G:\\Project\\MRSAPI-master\\MRSAPI-master\\MRSAPI\\MRSAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Development\\MRSAPI\\MRSAPI\\MRSAPI.csproj",
+        "projectUniqueName": "G:\\Project\\MRSAPI-master\\MRSAPI-master\\MRSAPI\\MRSAPI.csproj",
         "projectName": "MRSAPI",
-        "projectPath": "F:\\Development\\MRSAPI\\MRSAPI\\MRSAPI.csproj",
-        "packagesPath": "C:\\Users\\sunmo\\.nuget\\packages\\",
-        "outputPath": "F:\\Development\\MRSAPI\\MRSAPI\\obj\\",
+        "projectPath": "G:\\Project\\MRSAPI-master\\MRSAPI-master\\MRSAPI\\MRSAPI.csproj",
+        "packagesPath": "C:\\Users\\al-amin\\.nuget\\packages\\",
+        "outputPath": "G:\\Project\\MRSAPI-master\\MRSAPI-master\\MRSAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\sunmo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\al-amin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,7 +22,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {}
+          "https://www.nuget.org/api/v2/": {}
         },
         "frameworks": {
           "net6.0": {
@@ -40,6 +40,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer": {
+              "target": "Package",
+              "version": "[5.1.0, )"
+            },
             "Oracle.ManagedDataAccess.Core": {
               "target": "Package",
               "version": "[3.21.120, )"
@@ -68,7 +72,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     }
