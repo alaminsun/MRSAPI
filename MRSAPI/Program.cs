@@ -4,6 +4,9 @@ using MRSAPI.Repository.IRepository;
 using MRSAPI.Repository;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.OpenApi.Models;
+using System.Configuration;
+using System.Text;
+using MRSAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +22,9 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<MRSDbContext>();
 builder.Services.AddScoped<DBHelper>();
-builder.Services.AddTransient<ISampleRepository,SampleRepository>();
+//builder.Services.AddTransient<ISampleRepository,SampleRepository>();
 builder.Services.AddTransient<IDoctorRepository, DoctorRepository>();
+builder.Services.AddTransient<IInstitutionRepository, InstitutionRepository>();
 builder.Services.AddApiVersioning(options =>
 {
     options.AssumeDefaultVersionWhenUnspecified = true;
@@ -47,6 +51,30 @@ builder.Services.AddSwaggerGen(options =>
         });
     }
 });
+
+//var appSettingsSection = builder.Configuration.GetSection("AppSettings");
+//builder.Services.Configure<AppSettings>(appSettingsSection);
+
+//var appSettings = appSettingsSection.Get<AppSettings>();
+//var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+
+//builder.services.AddAuthentication(x =>
+//{
+//    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//})
+//.AddJwtBearer(x =>
+//{
+//    x.RequireHttpsMetadata = false;
+//    x.SaveToken = true;
+//    x.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+//    {
+//        ValidateIssuerSigningKey = true,
+//        IssuerSigningKey = new SymmetricSecurityKey(key),
+//        ValidateIssuer = false,
+//        ValidateAudience = false
+//    };
+//});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -71,7 +99,13 @@ if (app.Environment.IsDevelopment())
         }
     });
 }
+//app.Use(async (context, next) =>
+//{
+//    // Set a custom header for all responses
+//    context.Response.Headers["CustomKey"] = "My custom value";
 
+//    await next();
+//});
 app.UseHttpsRedirection();
 
 app.UseRouting();
@@ -81,7 +115,9 @@ app.UseCors(x => x
 .AllowAnyHeader());
 app.UseAuthentication();
 app.UseAuthorization();
+//app.UseApiKeyMiddleware();
 
+app.UseMiddleware<CustomHeaderMiddleware>();
 
 app.UseEndpoints(endpoints =>
 {

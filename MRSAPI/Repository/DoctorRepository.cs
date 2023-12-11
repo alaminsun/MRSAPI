@@ -108,11 +108,17 @@ namespace MRSAPI.Repository
             }
             return listData;
         }
-        public List<DoctorInformationModel> GetDoctorsByMarketCode(string marketCode)
+        public List<DoctorModel> GetDoctorsByMarketCode(string marketCode)
         {
-            List<DoctorInformationModel> listData = new List<DoctorInformationModel>();
-            string query = "Select DM.DOCTOR_ID, D.DOCTOR_NAME,dd.* From DOC_MKT_MAS dm left join DOC_MKT_DTL dd on DD.DOC_MKT_MAS_SLNO = DM.DOC_MKT_MAS_SLNO " +
-                            "left join DOCTOR d on D.DOCTOR_ID = DM.DOCTOR_ID Where 1=1";
+            List<DoctorModel> listData = new List<DoctorModel>();
+            //string query = "Select DM.DOCTOR_ID, D.DOCTOR_NAME,dd.* From DOC_MKT_MAS dm left join DOC_MKT_DTL dd on DD.DOC_MKT_MAS_SLNO = DM.DOC_MKT_MAS_SLNO " +
+            //                "left join DOCTOR d on D.DOCTOR_ID = DM.DOCTOR_ID Where 1=1";
+            string query = "SELECT DM.DOCTOR_ID, D.DOCTOR_NAME, DD.PRAC_MKT_CODE,M.MARKET_NAME, DD.DOC_MKT_MAS_SLNO,DD.DOC_MKT_DTL_SLNO,DD.INSTI_CODE,I.INSTI_NAME, " +
+                " DD.UPAZILA_CODE,DD.SBU_UNIT,DD.PERSONAL_PHONE,DD.MDP_LOC_CODE,DD.MDP_LOC_NAME,DD.EDP_LOC_CODE,DD.EDP_LOC_NAME,DD.CHAMB_PHONE,DD.CHAMB_ADDRESS1,DD.CHAMB_ADDRESS2,DD.CHAMB_ADDRESS3,DD.CHAMB_ADDRESS4" +
+                " FROM DOC_MKT_MAS dm LEFT JOIN DOC_MKT_DTL dd ON DD.DOC_MKT_MAS_SLNO = DM.DOC_MKT_MAS_SLNO " +
+                "  LEFT JOIN DOCTOR d ON D.DOCTOR_ID = DM.DOCTOR_ID" +
+                "  LEFT JOIN MARKET m ON M.MARKET_CODE = DD.PRAC_MKT_CODE" +
+                "  LEFT JOIN INSTITUTION i ON I.INSTI_CODE = DD.INSTI_CODE WHERE 1=1";
 
             if (marketCode != "")
             {
@@ -126,9 +132,13 @@ namespace MRSAPI.Repository
                 {
                     while (reader.Read())
                     {
-                        DoctorInformationModel model = new DoctorInformationModel();
+                        DoctorModel model = new DoctorModel();
                         model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
                         model.DoctorName = reader["DOCTOR_NAME"].ToString();
+                        model.DoctorMstSl = Convert.ToInt32(reader["DOC_MKT_MAS_SLNO"]);
+                        model.DoctorDetailSl = Convert.ToInt64(reader["DOC_MKT_DTL_SLNO"].ToString());
+                        model.MarketCode = reader["PRAC_MKT_CODE"].ToString();
+                        model.MarketName = reader["MARKET_NAME"].ToString();
                         listData.Add(model);
                     }
                 }
@@ -236,5 +246,7 @@ namespace MRSAPI.Repository
             }
             return listData;
         }
+
+        
     }
 }
