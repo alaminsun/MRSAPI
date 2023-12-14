@@ -1,6 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using MRSAPI.Models;
 using MRSAPI.Repository.IRepository;
+using System.Reflection;
+using System;
 
 namespace MRSAPI.Controllers
 {
@@ -92,7 +97,85 @@ namespace MRSAPI.Controllers
             return Ok(data);
 
         }
+        /// <summary>
+        /// fileType 1=PDF, 2=EXCEL, 3=DOCX, 4=IMAGE, 5=TEXT 
+        /// </summary>
+        /// <returns></returns>
+        //[HttpPost("[action]")]
+        //[HttpPost("{DoctorId:int}", Name = "DoctorFileAttchment")]
+        [HttpPost("[action]/{DoctorId:int}")]
+        public async Task<IActionResult> PostDoctorFileAttchment([FromForm] FileUploadModel fileUpload)
+        {
 
-        
+            var data = _doctorRepo.GetDoctorById(fileUpload.DoctorId);
+            if (data == 0)
+            {
+                return NotFound();
+            }
+            if (fileUpload.File != null)
+            {
+                fileUpload.FilePath  = await _doctorRepo.SavePostImageAsync(fileUpload);
+            }
+
+            var postResponse = await _doctorRepo.CreatePostAsync(fileUpload);
+           // Create the ApiResponse
+            var response = new ApiResponse<FileUploadModel>
+            {
+                Message = "Data saved successfully.",
+                Data = postResponse
+            };
+            return Ok(response);
+
+        }
+
+
+        //[HttpPut("{id}")]
+        //[HttpPut("{Id:int}", Name = "PutDoctorFileAttchment")]
+        [HttpPut("[action]/{id:int}")]
+        public async Task<IActionResult> PutDoctorFileAttchment(int id, [FromForm] FileUploadModel updatedItem)
+        {
+            //var existingItem = updatedItem.FirstOrDefault(i => i.Id == id);
+
+            var existingItem = _doctorRepo.GetDoctorwithFileById(id);
+            if (existingItem == null)
+            {
+                return NotFound();
+            }
+            //var data = _context.Laptops.Where(e => e.Id == model.Id).SingleOrDefault();
+            string uniqueFileName = string.Empty;
+            if (updatedItem.File != null)
+            {
+                if (existingItem.FilePath != null)
+                {
+                    //string filePath = Path.Combine(_environment.WebRootPath, "Content/Laptop", data.Path);
+                    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files", existingItem.FilePath);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+                //uniqueFileName = UploadImage(model);
+                uniqueFileName = await _doctorRepo.SavePostImageAsync(updatedItem);
+            }
+            existingItem.FileName = updatedItem.FileName;
+            existingItem.FileType = updatedItem.FileType;
+            //existingItem.FilePath = updatedItem.FilePath;
+            if (updatedItem.File != null)
+            {
+                existingItem.FilePath = uniqueFileName;
+            }
+    
+
+            var postResponse = await _doctorRepo.UpdatePutAsync(id,existingItem);
+            // Create the ApiResponse
+            var response = new ApiResponse<FileUploadModel>
+            {
+                Message = "Data updated successfully.",
+                Data = postResponse
+            };
+            return Ok(response);
+        }
+
+
     }
 }

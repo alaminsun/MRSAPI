@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using System.Configuration;
 using System.Text;
 using MRSAPI;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,9 @@ builder.Services.AddSwaggerGen(options =>
             Version = description.ApiVersion.ToString(),
             // Add any other relevant information
         });
+        var xmlCommentFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var cmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommentFile);
+        options.IncludeXmlComments(cmlCommentsFullPath);
     }
 });
 
@@ -81,15 +85,6 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    //app.UseSwaggerUI();
-    //app.UseSwaggerUI(options =>
-    //{
-    //    foreach (var desc in provider.ApiVersionDescriptions)
-    //        options.SwaggerEndpoint($"/swagger/{desc.GroupName}/swagger.json",
-    //            desc.GroupName.ToUpperInvariant());
-    //    //options.RoutePrefix = "";
-
-    //});
     app.UseSwaggerUI(options =>
     {
         // Configure Swagger UI for each version
@@ -99,6 +94,16 @@ if (app.Environment.IsDevelopment())
         }
     });
 }
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    // Configure Swagger UI for each version
+    foreach (var description in app.Services.GetRequiredService<IApiVersionDescriptionProvider>().ApiVersionDescriptions)
+    {
+        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+    }
+});
 //app.Use(async (context, next) =>
 //{
 //    // Set a custom header for all responses

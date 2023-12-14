@@ -1,4 +1,5 @@
-﻿using MRSAPI.Models;
+﻿
+using MRSAPI.Models;
 using System.Numerics;
 using System.Reflection;
 
@@ -12,5 +13,12 @@ namespace MRSAPI.Repository.IRepository
         List<SpecializationModel> GetSpecializationList();
         List<LocationModel> GetLocation();
         List<DoctorInformationModel> GetPotentialCategoryList();
+        long GetDoctorById(int doctorId);
+        string GetFilePatheWithName(string fileName);
+        FileUploadModel GetDoctorwithFileById(int id);
+        //Task SavePostImageAsync(FileUploadModel fileUpload);
+        Task<string> SavePostImageAsync(FileUploadModel fileUpload);
+        Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload);
+        Task<FileUploadModel> UpdatePutAsync(int id ,FileUploadModel existingItem);
     }
 }

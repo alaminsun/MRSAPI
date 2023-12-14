@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>F:\Publish\MRSAPI</_PublishTargetUrl>
+    <History>True|2023-12-11T03:20:16.7248835Z;False|2023-12-11T09:19:39.9468272+06:00;True|2023-12-11T08:48:39.5297942+06:00;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DefaultConnection">
+      <Value>Data Source=%28DESCRIPTION =%28ADDRESS_LIST =%28ADDRESS = %28PROTOCOL = TCP%29%28HOST = 172.16.243.234%29%28PORT = 1521%29%29%29%28CONNECT_DATA =%28SID = silsqadb1%29%28SERVER = DEDICATED%29%29%29%3bUser Id=MRS%3bPassword=mrs</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>

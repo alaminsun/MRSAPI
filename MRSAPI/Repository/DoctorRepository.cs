@@ -1,11 +1,18 @@
-﻿using MRSAPI.Data;
+﻿
+using Microsoft.Extensions.Hosting;
+using MRSAPI.Data;
 using MRSAPI.Gateway;
+using MRSAPI.Helpers;
 using MRSAPI.Models;
 using MRSAPI.Repository.IRepository;
 using Oracle.ManagedDataAccess.Client;
+using System;
 using System.Data;
 using System.Data.Common;
+using System.IO;
+using System.Net;
 using System.Numerics;
+using System.Reflection;
 
 namespace MRSAPI.Repository
 {
@@ -13,10 +20,12 @@ namespace MRSAPI.Repository
     {
         private readonly DBHelper _dbHelper;
         private readonly MRSDbContext _db;
-        public DoctorRepository(DBHelper dbHelper, MRSDbContext db)
+        private readonly IWebHostEnvironment environment;
+        public DoctorRepository(DBHelper dbHelper, MRSDbContext db, IWebHostEnvironment environment)
         {
             _dbHelper = dbHelper;
             _db = db;
+            this.environment = environment;
         }
 
         public List<DoctorInformationModel> GetDoctorList(string doctorName, string? registrationNo, string? mobileNo, string designation, string specialization)
@@ -113,16 +122,20 @@ namespace MRSAPI.Repository
             List<DoctorModel> listData = new List<DoctorModel>();
             //string query = "Select DM.DOCTOR_ID, D.DOCTOR_NAME,dd.* From DOC_MKT_MAS dm left join DOC_MKT_DTL dd on DD.DOC_MKT_MAS_SLNO = DM.DOC_MKT_MAS_SLNO " +
             //                "left join DOCTOR d on D.DOCTOR_ID = DM.DOCTOR_ID Where 1=1";
-            string query = "SELECT DM.DOCTOR_ID, D.DOCTOR_NAME, DD.PRAC_MKT_CODE,M.MARKET_NAME, DD.DOC_MKT_MAS_SLNO,DD.DOC_MKT_DTL_SLNO,DD.INSTI_CODE,I.INSTI_NAME, " +
-                " DD.UPAZILA_CODE,DD.SBU_UNIT,DD.PERSONAL_PHONE,DD.MDP_LOC_CODE,DD.MDP_LOC_NAME,DD.EDP_LOC_CODE,DD.EDP_LOC_NAME,DD.CHAMB_PHONE,DD.CHAMB_ADDRESS1,DD.CHAMB_ADDRESS2,DD.CHAMB_ADDRESS3,DD.CHAMB_ADDRESS4" +
-                " FROM DOC_MKT_MAS dm LEFT JOIN DOC_MKT_DTL dd ON DD.DOC_MKT_MAS_SLNO = DM.DOC_MKT_MAS_SLNO " +
+            string query = "SELECT DM.DOCTOR_ID, D.DOCTOR_NAME, DD.PRAC_MKT_CODE, M.MARKET_NAME, DD.DOC_MKT_MAS_SLNO, DD.DOC_MKT_DTL_SLNO, D.DESIGNATION_CODE, D.DESIGNATION, " +
+                " D.SPECIA_1ST_CODE Speciality_Code, DS.SPECIALIZATION Speciality_Name, DD.INSTI_CODE, I.INSTI_NAME, DD.UPAZILA_CODE, DD.SBU_UNIT,  DD.PERSONAL_PHONE," +
+                " DD.MDP_LOC_CODE, DD.MDP_LOC_NAME,DD.EDP_LOC_CODE, DD.EDP_LOC_NAME,DD.CHAMB_PHONE, " +
+                " (DD.CHAMB_ADDRESS1 || ' ' || DD.CHAMB_ADDRESS2 || ' ' || DD.CHAMB_ADDRESS3 || ' ' || DD.CHAMB_ADDRESS2) Address "+
+                "  FROM DOC_MKT_MAS dm LEFT JOIN DOC_MKT_DTL dd ON DD.DOC_MKT_MAS_SLNO = DM.DOC_MKT_MAS_SLNO " +
                 "  LEFT JOIN DOCTOR d ON D.DOCTOR_ID = DM.DOCTOR_ID" +
                 "  LEFT JOIN MARKET m ON M.MARKET_CODE = DD.PRAC_MKT_CODE" +
-                "  LEFT JOIN INSTITUTION i ON I.INSTI_CODE = DD.INSTI_CODE WHERE 1=1";
+                "  LEFT JOIN INSTITUTION i ON I.INSTI_CODE = DD.INSTI_CODE " +
+                "  LEFT JOIN DOCTOR_SPECIALIZATION ds  ON DS.SPECIALIZATION_CODE = D.SPECIA_1ST_CODE WHERE 1=1";
 
             if (marketCode != "")
             {
-                query += " AND UPPER(dd.PRAC_MKT_CODE) LIKE '%" + marketCode.ToUpper() + "%'";
+                //query += " AND UPPER(dd.PRAC_MKT_CODE) LIKE '%" + marketCode.ToUpper() + "%'";
+                query += " AND UPPER(dd.PRAC_MKT_CODE) = '" + marketCode.ToUpper() + "'";
             }
             using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
             {
@@ -137,8 +150,23 @@ namespace MRSAPI.Repository
                         model.DoctorName = reader["DOCTOR_NAME"].ToString();
                         model.DoctorMstSl = Convert.ToInt32(reader["DOC_MKT_MAS_SLNO"]);
                         model.DoctorDetailSl = Convert.ToInt64(reader["DOC_MKT_DTL_SLNO"].ToString());
+                        if (reader["DESIGNATION_CODE"] != DBNull.Value)
+                        {
+                            model.DesignationCode = Convert.ToInt32(reader["DESIGNATION_CODE"]); 
+                        }
+                        else
+                        {
+                            model.DesignationCode = 0;
+                        }
+                        model.DesignationName = reader["DESIGNATION"].ToString();
+                        model.SpecialtyCode = reader["Speciality_Code"].ToString();
+                        model.SpecialtyName = reader["Speciality_Name"].ToString();
+                        model.InstitutionCode = reader["INSTI_CODE"].ToString();
+                        model.InstitutionName = reader["INSTI_NAME"].ToString();
+                        model.Address = reader["Address"].ToString();
                         model.MarketCode = reader["PRAC_MKT_CODE"].ToString();
                         model.MarketName = reader["MARKET_NAME"].ToString();
+                        model.PhoneNumber = reader["CHAMB_PHONE"].ToString();
                         listData.Add(model);
                     }
                 }
@@ -247,6 +275,171 @@ namespace MRSAPI.Repository
             return listData;
         }
 
-        
+
+
+
+
+        public async Task<string> SavePostImageAsync(FileUploadModel fileUpload)
+        {
+            string uniqueFileName = string.Empty;
+            if (fileUpload.File != null)
+            {
+                //string uploadFolder = Path.Combine(_environment.WebRootPath, "Content/Laptop/");
+                string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
+                //var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
+                if (!Directory.Exists(uploadFolder))
+                {
+                    Directory.CreateDirectory(uploadFolder);
+                }
+                uniqueFileName = Guid.NewGuid().ToString() + "_" + fileUpload.File.FileName;
+                string filePath = Path.Combine(uploadFolder, uniqueFileName);
+                //string deleteFromFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await fileUpload.File.CopyToAsync(fileStream);
+                }
+                fileUpload.FilePath = filePath;
+            }
+            return uniqueFileName;
+
+            //string FileName = string.Empty;
+            //if (fileUpload.File != null)
+            //{
+            //    //string uploadFolder = Path.Combine(_environment.WebRootPath, "Content/Laptop/");
+            //    string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
+            //    //var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
+            //    if (!Directory.Exists(uploadFolder))
+            //    {
+            //        Directory.CreateDirectory(uploadFolder);
+            //    }
+            //    //FileName = Guid.NewGuid().ToString() + "_" + fileUpload.File.FileName;
+            //    FileName = fileUpload.File.FileName;
+            //    string filePath = Path.Combine(uploadFolder, FileName);
+            //    var dbFilePathe = GetFilePatheWithName(filePath);
+            //    //string dbFilePathe = Path.Combine(Directory.GetCurrentDirectory(), deleteFromFolder, data.FilePath);
+            //    if (dbFilePathe == filePath)
+            //    {
+            //        if (System.IO.File.Exists(dbFilePathe))
+            //        {
+            //            System.IO.File.Delete(dbFilePathe);
+            //        }
+            //    }
+            //    //string deleteFromFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
+            //    using (var fileStream = new FileStream(filePath, FileMode.Create))
+            //    {
+            //        await fileUpload.File.CopyToAsync(fileStream);
+            //    }
+            //    fileUpload.FilePath = filePath;
+            //}
+            //return FileName;
+
+        }
+
+        public string GetFilePatheWithName(string filePath)
+        {
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                string query = "Select FILE_PATH from DOCTOR_FILES Where FILE_PATH = '" + filePath + "'";
+                //string filePath = string.Empty;
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        filePath = reader["FILE_PATH"].ToString();
+                    }
+                    return filePath;
+                }
+            }
+        }
+
+        public async Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload)
+        {
+            var post = new FileUploadModel
+            {
+                DoctorId = fileUpload.DoctorId,
+                FileName = fileUpload.FileName,
+                FileType = fileUpload.FileType,
+                FilePath = fileUpload.FilePath
+            };
+
+            string saveQuery = "INSERT INTO DOCTOR_FILES (ID,DOCTOR_ID,FILE_TYPE,FILE_PATH,FILE_NAME) VALUES(incremet_id.NEXTVAL," + post.DoctorId + ",'" + post.FileType + "','" + post.FilePath + "','" + post.FileName + "')";
+            _dbHelper.CmdExecute(saveQuery);
+
+            return post;
+
+        }
+
+
+        public async Task<FileUploadModel> UpdatePutAsync(int id,FileUploadModel existingItem)
+        {
+            var put = new FileUploadModel
+            {
+                //DoctorId = fileUpload.DoctorId,
+                FileName = existingItem.FileName,
+                FileType = existingItem.FileType,
+                FilePath = existingItem.FilePath,
+            };
+
+            string saveQuery = "UPDATE DOCTOR_FILES SET FILE_NAME='" + put.FileName + "', FILE_TYPE='" + put.FileType + "',FILE_PATH='" + put.FilePath + "' WHERE ID= " + id + ""; 
+            _dbHelper.CmdExecute(saveQuery);
+
+
+            return put;
+        }
+
+
+
+        public FileUploadModel GetDoctorwithFileById(int id)
+        {
+            FileUploadModel model = new FileUploadModel();
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                string query = "Select * from DOCTOR_FILES Where ID = " + id + "";
+                //long doctor_Id = 0;
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+
+                    while (reader.Read())
+                    {
+                        
+                        model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
+                        model.FileName = reader["FILE_NAME"].ToString();
+                        //model.FileType = (FileType)Convert.ToInt32(reader["FILE_TYPE"]);
+                        model.FilePath = reader["FILE_PATH"].ToString();
+                    }
+                   
+                }
+            }
+            return model;
+
+        }
+
+        public long GetDoctorById(int doctorId)
+        {
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                string query = "Select * from doctor Where DOCTOR_ID = " + doctorId + "";
+                long doctor_Id = 0;
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        doctor_Id = Convert.ToInt32(reader["DOCTOR_ID"]);
+                        //model.FileName = reader["FILE_NAME"].ToString();
+                        ////model.FileType = (FileType)Convert.ToInt32(reader["FILE_TYPE"]);
+                        //model.FilePath = reader["FILE_PATH"].ToString();
+                    }
+                    return doctor_Id;
+                }
+            }
+
+        }
+
     }
 }

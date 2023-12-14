@@ -1203,11 +1203,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "G:\\Project\\MRSAPI\\MRSAPI\\MRSAPI.csproj",
+      "projectUniqueName": "F:\\Development\\Development\\Office\\2023\\MRSAPI13122023\\MRSAPI\\MRSAPI\\MRSAPI.csproj",
       "projectName": "MRSAPI",
-      "projectPath": "G:\\Project\\MRSAPI\\MRSAPI\\MRSAPI.csproj",
+      "projectPath": "F:\\Development\\Development\\Office\\2023\\MRSAPI13122023\\MRSAPI\\MRSAPI\\MRSAPI.csproj",
       "packagesPath": "C:\\Users\\al-amin\\.nuget\\packages\\",
-      "outputPath": "G:\\Project\\MRSAPI\\MRSAPI\\obj\\",
+      "outputPath": "F:\\Development\\Development\\Office\\2023\\MRSAPI13122023\\MRSAPI\\MRSAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\al-amin\\AppData\\Roaming\\NuGet\\NuGet.Config",
