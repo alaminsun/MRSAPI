@@ -16,7 +16,10 @@
         public string MarketCode { get; set; }
         public string MarketName { get; set; }
         public string PhoneNumber { get; set; }
-
+        public string MorningLocCode { get; set; }
+        public string MorningLocName { get; set; }
+        public string EveningLocCode { get; set; }
+        public string EveningLocName { get; set; }
 
 
     }

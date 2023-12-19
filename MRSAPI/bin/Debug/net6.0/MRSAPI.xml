@@ -10,5 +10,11 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:MRSAPI.Controllers.DoctorController.PutDoctorFileAttchment(System.Int32,MRSAPI.Models.FileUploadModel)">
+            <summary>
+            fileType 1=PDF, 2=EXCEL, 3=DOCX, 4=IMAGE, 5=TEXT 
+            </summary>
+            <returns></returns>
+        </member>
     </members>
 </doc>

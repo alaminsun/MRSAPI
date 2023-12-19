@@ -97,6 +97,7 @@ namespace MRSAPI.Controllers
             return Ok(data);
 
         }
+
         /// <summary>
         /// fileType 1=PDF, 2=EXCEL, 3=DOCX, 4=IMAGE, 5=TEXT 
         /// </summary>
@@ -128,7 +129,10 @@ namespace MRSAPI.Controllers
 
         }
 
-
+        /// <summary>
+        /// fileType 1=PDF, 2=EXCEL, 3=DOCX, 4=IMAGE, 5=TEXT 
+        /// </summary>
+        /// <returns></returns>
         //[HttpPut("{id}")]
         //[HttpPut("{Id:int}", Name = "PutDoctorFileAttchment")]
         [HttpPut("[action]/{id:int}")]

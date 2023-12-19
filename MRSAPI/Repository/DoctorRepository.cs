@@ -132,6 +132,54 @@ namespace MRSAPI.Repository
                 "  LEFT JOIN INSTITUTION i ON I.INSTI_CODE = DD.INSTI_CODE " +
                 "  LEFT JOIN DOCTOR_SPECIALIZATION ds  ON DS.SPECIALIZATION_CODE = D.SPECIA_1ST_CODE WHERE 1=1";
 
+
+
+ //           SELECT DM.DOCTOR_ID,
+ //      D.DOCTOR_NAME,
+ //      DD.PRAC_MKT_CODE,
+ //      M.MARKET_NAME,
+ //      DD.DOC_MKT_MAS_SLNO,
+ //      DD.DOC_MKT_DTL_SLNO,
+ //      D.DESIGNATION_CODE,
+ //      D.DESIGNATION,
+ //      D.SPECIA_1ST_CODE Speciality_Code,
+ //      DS.SPECIALIZATION Speciality_Name,
+ //      DD.INSTI_CODE,
+ //      I.INSTI_NAME,
+ //      DD.PERSONAL_PHONE,
+ //      DD.MDP_LOC_CODE,
+ //      DD.MDP_LOC_NAME,
+ //      DD.EDP_LOC_CODE,
+ //      DD.EDP_LOC_NAME,
+ //      DD.CHAMB_PHONE,
+ //      (DD.CHAMB_ADDRESS1
+ //       || ' '
+ //       || DD.CHAMB_ADDRESS2
+ //       || ' '
+ //       || DD.CHAMB_ADDRESS3
+ //       || ' '
+ //       || DD.CHAMB_ADDRESS2) Address,
+ //      DD.UPAZILA_CODE,
+ //      DU.UPAZILA_NAME,
+ //      DU.DISTC_CODE,
+ //      DU.DISTC_NAME,
+ //      D.POTENTIAL_CATEGORY,
+ //      D.PATIENT_PER_DAY,
+ //      DD.SBU_UNIT,
+ //      D.PRESC_SHARE,
+ //      D.REMARKS
+
+ // FROM DOC_MKT_MAS dm
+ //      LEFT JOIN DOC_MKT_DTL dd ON DD.DOC_MKT_MAS_SLNO = DM.DOC_MKT_MAS_SLNO
+ //      LEFT JOIN DOCTOR d ON D.DOCTOR_ID = DM.DOCTOR_ID
+ //      LEFT JOIN MARKET m ON M.MARKET_CODE = DD.PRAC_MKT_CODE
+ //      LEFT JOIN INSTITUTION i ON I.INSTI_CODE = DD.INSTI_CODE
+ //      LEFT JOIN DOCTOR_SPECIALIZATION ds ON DS.SPECIALIZATION_CODE = D.SPECIA_1ST_CODE
+ //      LEFT JOIN DISTRICT_UPAZILA du ON DD.UPAZILA_CODE = DU.UPAZILA_CODE
+
+
+ //WHERE 1 = 1
+
             if (marketCode != "")
             {
                 //query += " AND UPPER(dd.PRAC_MKT_CODE) LIKE '%" + marketCode.ToUpper() + "%'";
@@ -167,6 +215,11 @@ namespace MRSAPI.Repository
                         model.MarketCode = reader["PRAC_MKT_CODE"].ToString();
                         model.MarketName = reader["MARKET_NAME"].ToString();
                         model.PhoneNumber = reader["CHAMB_PHONE"].ToString();
+                        model.MorningLocCode = reader["MDP_LOC_CODE"].ToString();
+                        model.MorningLocName = reader["MDP_LOC_NAME"].ToString();
+                        model.EveningLocCode = reader["EDP_LOC_CODE"].ToString();
+                        model.EveningLocName = reader["EDP_LOC_NAME"].ToString();
+
                         listData.Add(model);
                     }
                 }
