@@ -12,7 +12,7 @@ namespace MRSAPI.Repository.IRepository
         List<DesignationModel> GetDesignationList();
         List<SpecializationModel> GetSpecializationList();
         List<LocationModel> GetLocation();
-        List<DoctorInformationModel> GetPotentialCategoryList();
+        List<PotentialCategoryModel> GetPotentialCategoryList();
         long GetDoctorById(int doctorId);
         string GetFilePatheWithName(string fileName);
         FileUploadModel GetDoctorwithFileById(int id);
@@ -20,5 +20,8 @@ namespace MRSAPI.Repository.IRepository
         Task<string> SavePostImageAsync(FileUploadModel fileUpload);
         Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload);
         Task<FileUploadModel> UpdatePutAsync(int id ,FileUploadModel existingItem);
+        List<DistrictModel> GetDistrictList();
+        List<UpazilaModel> GetUpazilaList();
+        List<MarketInfoModel> GetMarketListWithSBU(string marketName);
     }
 }

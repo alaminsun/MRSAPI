@@ -86,9 +86,49 @@ namespace MRSAPI.Controllers
         }
 
         [HttpGet("[action]")]
+        public IActionResult GetDistrictInfo()
+        {
+            var data = _doctorRepo.GetUpazilaList();
+            if (data.Count() == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok(data);
+
+        }
+
+        [HttpGet("[action]")]
+        public IActionResult GetUpazila()
+        {
+            var data = _doctorRepo.GetUpazilaList();
+            if (data.Count() == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok(data);
+
+        }
+
+        [HttpGet("[action]")]
         public IActionResult GetPotentialCategoryList()
         {
             var data = _doctorRepo.GetPotentialCategoryList();
+            if (data.Count() == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok(data);
+
+        }
+
+        //[HttpGet("[action]")]
+        [HttpGet("[action]/{marketName}")]
+        public IActionResult MarketInfo(string marketName)
+        { 
+            var data = _doctorRepo.GetMarketListWithSBU(marketName);
             if (data.Count() == 0)
             {
                 return NotFound();

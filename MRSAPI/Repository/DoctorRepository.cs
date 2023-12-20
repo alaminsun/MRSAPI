@@ -125,60 +125,14 @@ namespace MRSAPI.Repository
             string query = "SELECT DM.DOCTOR_ID, D.DOCTOR_NAME, DD.PRAC_MKT_CODE, M.MARKET_NAME, DD.DOC_MKT_MAS_SLNO, DD.DOC_MKT_DTL_SLNO, D.DESIGNATION_CODE, D.DESIGNATION, " +
                 " D.SPECIA_1ST_CODE Speciality_Code, DS.SPECIALIZATION Speciality_Name, DD.INSTI_CODE, I.INSTI_NAME, DD.UPAZILA_CODE, DD.SBU_UNIT,  DD.PERSONAL_PHONE," +
                 " DD.MDP_LOC_CODE, DD.MDP_LOC_NAME,DD.EDP_LOC_CODE, DD.EDP_LOC_NAME,DD.CHAMB_PHONE, " +
-                " (DD.CHAMB_ADDRESS1 || ' ' || DD.CHAMB_ADDRESS2 || ' ' || DD.CHAMB_ADDRESS3 || ' ' || DD.CHAMB_ADDRESS2) Address "+
+                " (DD.CHAMB_ADDRESS1 || ' ' || DD.CHAMB_ADDRESS2 || ' ' || DD.CHAMB_ADDRESS3 || ' ' || DD.CHAMB_ADDRESS2) Address, "+
+                " DD.UPAZILA_CODE,DU.UPAZILA_NAME, DU.DISTC_CODE,DU.DISTC_NAME,D.POTENTIAL_CATEGORY,D.PATIENT_PER_DAY,M.SBU_CODE,DD.SBU_UNIT, D.PRESC_SHARE, D.REMARKS" +
                 "  FROM DOC_MKT_MAS dm LEFT JOIN DOC_MKT_DTL dd ON DD.DOC_MKT_MAS_SLNO = DM.DOC_MKT_MAS_SLNO " +
                 "  LEFT JOIN DOCTOR d ON D.DOCTOR_ID = DM.DOCTOR_ID" +
                 "  LEFT JOIN MARKET m ON M.MARKET_CODE = DD.PRAC_MKT_CODE" +
                 "  LEFT JOIN INSTITUTION i ON I.INSTI_CODE = DD.INSTI_CODE " +
-                "  LEFT JOIN DOCTOR_SPECIALIZATION ds  ON DS.SPECIALIZATION_CODE = D.SPECIA_1ST_CODE WHERE 1=1";
-
-
-
- //           SELECT DM.DOCTOR_ID,
- //      D.DOCTOR_NAME,
- //      DD.PRAC_MKT_CODE,
- //      M.MARKET_NAME,
- //      DD.DOC_MKT_MAS_SLNO,
- //      DD.DOC_MKT_DTL_SLNO,
- //      D.DESIGNATION_CODE,
- //      D.DESIGNATION,
- //      D.SPECIA_1ST_CODE Speciality_Code,
- //      DS.SPECIALIZATION Speciality_Name,
- //      DD.INSTI_CODE,
- //      I.INSTI_NAME,
- //      DD.PERSONAL_PHONE,
- //      DD.MDP_LOC_CODE,
- //      DD.MDP_LOC_NAME,
- //      DD.EDP_LOC_CODE,
- //      DD.EDP_LOC_NAME,
- //      DD.CHAMB_PHONE,
- //      (DD.CHAMB_ADDRESS1
- //       || ' '
- //       || DD.CHAMB_ADDRESS2
- //       || ' '
- //       || DD.CHAMB_ADDRESS3
- //       || ' '
- //       || DD.CHAMB_ADDRESS2) Address,
- //      DD.UPAZILA_CODE,
- //      DU.UPAZILA_NAME,
- //      DU.DISTC_CODE,
- //      DU.DISTC_NAME,
- //      D.POTENTIAL_CATEGORY,
- //      D.PATIENT_PER_DAY,
- //      DD.SBU_UNIT,
- //      D.PRESC_SHARE,
- //      D.REMARKS
-
- // FROM DOC_MKT_MAS dm
- //      LEFT JOIN DOC_MKT_DTL dd ON DD.DOC_MKT_MAS_SLNO = DM.DOC_MKT_MAS_SLNO
- //      LEFT JOIN DOCTOR d ON D.DOCTOR_ID = DM.DOCTOR_ID
- //      LEFT JOIN MARKET m ON M.MARKET_CODE = DD.PRAC_MKT_CODE
- //      LEFT JOIN INSTITUTION i ON I.INSTI_CODE = DD.INSTI_CODE
- //      LEFT JOIN DOCTOR_SPECIALIZATION ds ON DS.SPECIALIZATION_CODE = D.SPECIA_1ST_CODE
- //      LEFT JOIN DISTRICT_UPAZILA du ON DD.UPAZILA_CODE = DU.UPAZILA_CODE
-
-
- //WHERE 1 = 1
+                "  LEFT JOIN DOCTOR_SPECIALIZATION ds  ON DS.SPECIALIZATION_CODE = D.SPECIA_1ST_CODE" +
+                " LEFT JOIN DISTRICT_UPAZILA du ON DD.UPAZILA_CODE = DU.UPAZILA_CODE WHERE 1=1";
 
             if (marketCode != "")
             {
@@ -214,12 +168,49 @@ namespace MRSAPI.Repository
                         model.Address = reader["Address"].ToString();
                         model.MarketCode = reader["PRAC_MKT_CODE"].ToString();
                         model.MarketName = reader["MARKET_NAME"].ToString();
-                        model.PhoneNumber = reader["CHAMB_PHONE"].ToString();
                         model.MorningLocCode = reader["MDP_LOC_CODE"].ToString();
                         model.MorningLocName = reader["MDP_LOC_NAME"].ToString();
                         model.EveningLocCode = reader["EDP_LOC_CODE"].ToString();
                         model.EveningLocName = reader["EDP_LOC_NAME"].ToString();
+                        model.DistrictCode = reader["DISTC_CODE"].ToString();
+                        model.DistrictName = reader["DISTC_NAME"].ToString();
+                        model.UpazilaCode = reader["UPAZILA_CODE"].ToString();
+                        model.UpazilaName = reader["UPAZILA_NAME"].ToString();
+                        model.PotentialCategory = reader["POTENTIAL_CATEGORY"].ToString();
+                        model.PatientPerDay = reader["PATIENT_PER_DAY"].ToString();
+                        model.SBUCode = reader["SBU_CODE"].ToString();
+                        model.SBUUnit = reader["SBU_UNIT"].ToString();
+                        model.PersonalPhoneNumber = reader["PERSONAL_PHONE"].ToString();
+                        model.ChamberPhoneNumber = reader["CHAMB_PHONE"].ToString();
+                        model.doctorAttachments = GetAttachmentByDoctor(model.DoctorId);
+                        model.Remarks = reader["REMARKS"].ToString();
 
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
+        }
+
+        public List<DoctorAttachmentModel> GetAttachmentByDoctor(int doctorId)
+        {
+            List<DoctorAttachmentModel> listData = new List<DoctorAttachmentModel>();
+            string query = "Select ID,DOCTOR_ID,FILE_TYPE,FILE_PATH,FILE_NAME From DOCTOR_FILES WHERE DOCTOR_ID = "+doctorId+"";
+
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        DoctorAttachmentModel model = new DoctorAttachmentModel();
+                        model.Id = Convert.ToInt32(reader["ID"]);
+                        model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
+                        model.FileType = reader["FILE_TYPE"].ToString();
+                        model.FilePath = reader["FILE_PATH"].ToString();
+                        model.FileName = reader["FILE_NAME"].ToString();
                         listData.Add(model);
                     }
                 }
@@ -306,9 +297,9 @@ namespace MRSAPI.Repository
             return listData;
         }
 
-        public List<DoctorInformationModel> GetPotentialCategoryList()
+        public List<PotentialCategoryModel> GetPotentialCategoryList()
         {
-            List<DoctorInformationModel> listData = new List<DoctorInformationModel>();
+            List<PotentialCategoryModel> listData = new List<PotentialCategoryModel>();
             string query = "Select distinct POTENTIAL_CATEGORY From DOCTOR Where POTENTIAL_CATEGORY is not null";
 
             using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
@@ -319,8 +310,8 @@ namespace MRSAPI.Repository
                 {
                     while (reader.Read())
                     {
-                        DoctorInformationModel model = new DoctorInformationModel();
-                        model.PotentialCategory = reader["POTENTIAL_CATEGORY"].ToString();
+                        PotentialCategoryModel model = new PotentialCategoryModel();
+                        model.PotentialCatName = reader["POTENTIAL_CATEGORY"].ToString();
                         listData.Add(model);
                     }
                 }
@@ -328,8 +319,82 @@ namespace MRSAPI.Repository
             return listData;
         }
 
+        public List<DistrictModel> GetDistrictList()
+        {
+            List<DistrictModel> listData = new List<DistrictModel>();
+            string query = "Select DISTC_CODE,DISTC_NAME From DOCTOR Where DISTRICT";
 
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        DistrictModel model = new DistrictModel();
+                        model.DstrictCode = reader["DISTC_CODE"].ToString();
+                        model.DstrictName = reader["DISTC_NAME"].ToString();
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
+        }
 
+        public List<MarketInfoModel> GetMarketListWithSBU(string marketName)
+        {
+            List<MarketInfoModel> listData = new List<MarketInfoModel>();
+            string query = "Select MARKET_CODE,MARKET_NAME,SBU_CODE,SBU_UNIT,(MARKET_CODE || '|' || SBU_CODE) Market_SBU_Code,(MARKET_NAME || '|' || SBU_UNIT) Market_SBU_Name  From MARKET Where 1=1";
+            if (marketName != "")
+            {
+                query += " AND UPPER(MARKET_NAME) LIKE '%" + marketName.ToUpper() + "%'";
+            }
+
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        MarketInfoModel model = new MarketInfoModel();
+                        model.MarketCode = reader["MARKET_CODE"].ToString();
+                        model.MarketName = reader["MARKET_NAME"].ToString();
+                        model.SBUCode = reader["SBU_CODE"].ToString();
+                        model.SBUUnit = reader["SBU_UNIT"].ToString();
+                        model.MarketSBUCode = reader["Market_SBU_Code"].ToString();
+                        model.MarketSBUName = reader["Market_SBU_Name"].ToString();
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
+        }
+
+        public List<UpazilaModel> GetUpazilaList()
+        {
+            List<UpazilaModel> listData = new List<UpazilaModel>();
+            string query = "Select UPAZILA_CODE,UPAZILA_NAME From UPAZILA";
+
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        UpazilaModel model = new UpazilaModel();
+                        model.UpazilaCode = reader["UPAZILA_CODE"].ToString();
+                        model.UpazilaName = reader["UPAZILA_NAME"].ToString();
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
+        }
 
 
         public async Task<string> SavePostImageAsync(FileUploadModel fileUpload)

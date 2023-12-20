@@ -20,7 +20,17 @@
         public string MorningLocName { get; set; }
         public string EveningLocCode { get; set; }
         public string EveningLocName { get; set; }
-
-
+        public string? DistrictName { get; set; }
+        public string? DistrictCode { get; set; }
+        public string? UpazilaCode { get; set; }
+        public string? UpazilaName { get; set; }
+        public string? PotentialCategory { get; set; }
+        public string? PatientPerDay { get; set; }
+        public string? SBUCode { get; set; }
+        public string? SBUUnit { get; set; }
+        public string? PersonalPhoneNumber { get; set; }
+        public string? ChamberPhoneNumber { get; set; }
+        public List<DoctorAttachmentModel> doctorAttachments { get; set; }
+        public string? Remarks { get; set; }
     }
 }
