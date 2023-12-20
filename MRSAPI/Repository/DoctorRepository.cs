@@ -20,12 +20,17 @@ namespace MRSAPI.Repository
     {
         private readonly DBHelper _dbHelper;
         private readonly MRSDbContext _db;
-        private readonly IWebHostEnvironment environment;
-        public DoctorRepository(DBHelper dbHelper, MRSDbContext db, IWebHostEnvironment environment)
+        private readonly IWebHostEnvironment _environment;
+        private readonly IDGenerated _iDGenerated;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        long mxSl = 0;
+        public DoctorRepository(DBHelper dbHelper, MRSDbContext db, IWebHostEnvironment environment, IDGenerated iDGenerated, IHttpContextAccessor httpContextAccessor)
         {
             _dbHelper = dbHelper;
             _db = db;
-            this.environment = environment;
+            _environment = environment;
+            _iDGenerated = iDGenerated;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public List<DoctorInformationModel> GetDoctorList(string doctorName, string? registrationNo, string? mobileNo, string designation, string specialization)
@@ -322,7 +327,7 @@ namespace MRSAPI.Repository
         public List<DistrictModel> GetDistrictList()
         {
             List<DistrictModel> listData = new List<DistrictModel>();
-            string query = "Select DISTC_CODE,DISTC_NAME From DOCTOR Where DISTRICT";
+            string query = "Select DISTC_CODE,DISTC_NAME From DISTRICT";
 
             using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
             {
@@ -333,8 +338,8 @@ namespace MRSAPI.Repository
                     while (reader.Read())
                     {
                         DistrictModel model = new DistrictModel();
-                        model.DstrictCode = reader["DISTC_CODE"].ToString();
-                        model.DstrictName = reader["DISTC_NAME"].ToString();
+                        model.DistrictCode = reader["DISTC_CODE"].ToString();
+                        model.DistrictName = reader["DISTC_NAME"].ToString();
                         listData.Add(model);
                     }
                 }
@@ -486,6 +491,144 @@ namespace MRSAPI.Repository
             _dbHelper.CmdExecute(saveQuery);
 
             return post;
+
+        }
+
+        public async Task<DoctorInformationAPIModel> SaveDoctorInfo(DoctorInformationAPIModel model)
+        {
+            try
+            {
+                //if (IsDoctorIDExitsByDoctorID(model.DoctorId))
+                //{
+                //    _vmMsg.Type = Enums.MessageType.Error;
+                //    _vmMsg.Msg = "Data Already Exist.";
+                //}
+                //else
+                //{
+                string employeeId = "1000";
+                var ip = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+                string CurrentDate = DateTime.Now.ToString("dd/MM/yyyy");
+                if (model.DoctorInfoModel != null)
+                    {
+                        foreach (DoctorInformationAPIModel docModel in model.DoctorInfoModel)
+                        {
+                            mxSl = _iDGenerated.getMAXSL("DOCTOR_ID", "DOCTOR Where DOCTOR_ID not in (900000)");
+                        //string setOndate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                       
+
+                        string qry1 = "INSERT INTO DOCTOR (DOCTOR_ID,REGISTRATION_NO,POTENTIAL_CATEGORY,DOCTOR_NAME,DEGREE,DEGREE_CODE,DESIGNATION_CODE,SPECIA_1ST_CODE,GENDER,RELIGION,DATE_OF_BIRTH,DOC_PERS_PHONE, " +
+                                         "DOCTOR_EMAIL,PATIENT_PER_DAY,AVG_PRESC_VALUE,ADDRESS1,REMARKS,ENTERED_BY,ENTERED_DATE,ENTERED_TERMINAL)" +
+                            "VALUES(" + mxSl + ", '" + docModel.RegistrationNo + "', '" + docModel.PotentialCategory + "', '" + docModel.DoctorName + "','" + docModel.DegreeTitle + "', " +
+                            "'" + docModel.DegreeCode + "','" + docModel.DesignationCode + "','" + docModel.SpecializationCode + "'," +
+                            "'" + docModel.Gender + "','" + docModel.Religion + "',(TO_DATE('" + docModel.DateOfBirth + "','dd-MM-yyyy')),'" + docModel.personalContactNumber + "','" + docModel.Email + "','" + docModel.PatientNoPerDay + "','" + docModel.ValuePerPrescription + "'," +
+                            "'" + docModel.Address + "','" + docModel.Remarks + "','" + employeeId + "'," +
+                            "(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')),'" + ip + "')";
+
+                            _dbHelper.CmdExecute(qry1);
+
+                            if (model.DoctorMarketDetailsModels != null)
+                            {
+                                long DoctorMstSl = _iDGenerated.getMAXSL("DOC_MKT_MAS_SLNO", "DOC_MKT_MAS");
+                                string query = "Insert into DOC_MKT_MAS(DOC_MKT_MAS_SLNO,DOCTOR_ID)values(" + DoctorMstSl + "," + mxSl + ")";
+                                _dbHelper.CmdExecute(query);
+
+                                foreach (var detailModel in model.DoctorMarketDetailsModels)
+                                {
+                                    long DoctorDetailSl = _iDGenerated.getMAXSL("DOC_MKT_DTL_SLNO", "DOC_MKT_DTL");
+                                    string query1 = "Insert Into DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE,SBU_UNIT, " +
+                                            " UPAZILA_CODE,MDP_LOC_CODE,EDP_LOC_CODE,INSTI_CODE,ENTRY_DATE,DISTC_CODE) Values(" + DoctorDetailSl + "," + DoctorMstSl + ",'" + detailModel.MarketCode + "','" + detailModel.SBU_UNIT + "', " +
+                                            "'" + detailModel.UpazilaCode + "','" + detailModel.MorningLocName + "','" + detailModel.EveningLocName + "'," + detailModel.InstituteCode + ",(TO_DATE('" + CurrentDate + "','dd/MM/yyyy'))," +
+                                            "'" + detailModel.DistrictCode + "')";
+                                    _dbHelper.CmdExecute(query1);
+                                }
+                            }
+                        }
+
+                    }
+                    mxSl = _iDGenerated.getMAXSL("DOCTOR_ID", "DOCTOR Where DOCTOR_ID not in (900000)");
+
+                //string qry = "INSERT INTO DOCTOR (DOCTOR_ID,REGISTRATION_NO,POTENTIAL_CATEGORY,HONORARIUM,DOCTOR_NAME,DEGREE,DEGREE_CODE,DESIGNATION,DESIGNATION_CODE,SPECIA_1ST_CODE,SPECIA_2ND_CODE,GENDER,RELIGION,DATE_OF_BIRTH,DOC_PERS_PHONE, " +
+                //             "DOCTOR_EMAIL,PATIENT_PER_DAY,AVG_PRESC_VALUE,PRESC_SHARE,ADDRESS1,ADDRESS2,ADDRESS3,ADDRESS4,REMARKS,ENTERED_BY,ENTERED_DATE,ENTERED_TERMINAL)" +
+                //"VALUES(" + mxSl + ", '" + model.RegistrationNo + "', '" + model.PotentialCategory + "', '" + model.Honorium + "', '" + model.DoctorName + "','" + model.Degree + "', " +
+                //"'" + model.DegreeCategory + "','" + model.Designation + "','" + model.DesignationCategory + "','" + model.SpeciFirstCode + "','" + model.SpeciSecondCode + "'," +
+                //"'" + model.Gender + "','" + model.Religion + "',(TO_DATE('" + model.DateOfBirth + "','dd-MM-yyyy')),'" + model.Phone + "','" + model.Email + "','" + model.PatientNo + "','" + model.PrescriptionValue + "'," +
+                //"'" + model.PrescriptionShare + "','" + model.Address1 + "','" + model.Address2 + "','" + model.Address3 + "','" + model.Address4 + "','" + model.Remarks + "','" + employeeId + "'," +
+                //"(TO_DATE('" + model.CurrentDate + "','dd/MM/yyyy')),'" + ip + "')";
+                string qry = "INSERT INTO DOCTOR (DOCTOR_ID,REGISTRATION_NO,POTENTIAL_CATEGORY,DOCTOR_NAME,DEGREE,DEGREE_CODE,DESIGNATION_CODE,SPECIA_1ST_CODE,GENDER,RELIGION,DATE_OF_BIRTH,DOC_PERS_PHONE, " +
+                                 "DOCTOR_EMAIL,PATIENT_PER_DAY,AVG_PRESC_VALUE,ADDRESS1,REMARKS,ENTERED_BY,ENTERED_DATE,ENTERED_TERMINAL)" +
+                    "VALUES(" + mxSl + ", '" + model.RegistrationNo + "', '" + model.PotentialCategory + "', '" + model.DoctorName + "','" + model.DegreeTitle + "', " +
+                    "'" + model.DegreeCode + "','" + model.DesignationCode + "','" + model.SpecializationCode + "'," +
+                    "'" + model.Gender + "','" + model.Religion + "',(TO_DATE('" + model.DateOfBirth + "','dd-MM-yyyy')),'" + model.personalContactNumber + "','" + model.Email + "','" + model.PatientNoPerDay + "','" + model.ValuePerPrescription + "'," +
+                    "'" + model.Address + "','" + model.Remarks + "','" + employeeId + "'," +
+                    "(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')),'" + ip + "')";
+
+                _dbHelper.CmdExecute(qry);
+
+                    if (model.DoctorMarketDetailsModels != null)
+                    {
+                        long DoctorMstSl = _iDGenerated.getMAXSL("DOC_MKT_MAS_SLNO", "DOC_MKT_MAS");
+                        string query = "Insert into DOC_MKT_MAS(DOC_MKT_MAS_SLNO,DOCTOR_ID)values(" + DoctorMstSl + "," + mxSl + ")";
+                        _dbHelper.CmdExecute(query);
+
+                        foreach (var detailModel in model.DoctorMarketDetailsModels)
+                        {
+                            long DoctorDetailSl = _iDGenerated.getMAXSL("DOC_MKT_DTL_SLNO", "DOC_MKT_DTL");
+                        //string query1 = "Insert Into DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE,SBU_UNIT,CHAMB_ADDRESS1,CHAMB_ADDRESS2,CHAMB_ADDRESS3,CHAMB_ADDRESS4,CHAMB_PHONE, " +
+                        //        "UPAZILA_CODE,MDP_LOC_CODE,EDP_LOC_CODE,INSTI_CODE,ENTRY_DATE,MDP_LOC_NAME,EDP_LOC_NAME) Values(" + detailModel.DoctorDetailSl + "," + model.DoctorMstSl + ",'" + detailModel.MarketCode + "','" + detailModel.SBU_GROUP + "', " +
+                        //        "'" + detailModel.ChamberAddress1 + "','" + detailModel.ChamberAddress2 + "','" + detailModel.ChamberAddress3 + "','" + detailModel.ChamberAddress4 + "','" + detailModel.Phone + "', " +
+                        //        "'" + detailModel.UpazilaCode + "','" + detailModel.MorningLocCode + "','" + detailModel.EveningLocCode + "'," + detailModel.InstituteCode + ",(TO_DATE('" + model.CurrentDate + "','dd/MM/yyyy')),'" + detailModel.MorningLocTextName + "','" + detailModel.EveningTextLocName + "')";
+                        string query1 = "Insert Into DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE,SBU_UNIT, " +
+                                " UPAZILA_CODE,MDP_LOC_CODE,EDP_LOC_CODE,INSTI_CODE,ENTRY_DATE,DISTC_CODE) Values(" + DoctorDetailSl + "," + DoctorMstSl + ",'" + detailModel.MarketCode + "','" + detailModel.SBU_UNIT + "', " +
+                                "'" + detailModel.UpazilaCode + "','" + detailModel.MorningLocName + "','" + detailModel.EveningLocName + "'," + detailModel.InstituteCode + ",(TO_DATE('" + CurrentDate + "','dd/MM/yyyy'))," +
+                                "'" + detailModel.DistrictCode + "')";
+                        _dbHelper.CmdExecute(query1);
+                        }
+                    }
+                    if (model.DoctorInSBUs != null)
+                    {
+                        foreach (DoctorInSBU detail in model.DoctorInSBUs)
+                        {
+                        long DoctorSBUId = _iDGenerated.getMAXSL("DOCTOR_SBU_ID", "DOC_MARKET_SBU");
+                        string query = "Insert into DOC_MARKET_SBU(DOCTOR_SBU_ID,DOCTOR_ID,MARKET_CODE,SBU_CODE) Values(" + DoctorSBUId + "," + mxSl + ",'" + detail.MarketCode + "','" + detail.SBUCode +"')";
+                            _dbHelper.CmdExecute(query);
+                        }
+                    }
+
+                    //_vmMsg.Type = Enums.MessageType.Success;
+                    //_vmMsg.Msg = "Saved Successfully.";
+                //}
+
+
+            }
+
+            catch (Exception ex)
+            {
+                //_vmMsg.Type = Enums.MessageType.Error;
+                //_vmMsg.Msg = "Failed to save.";
+
+                //if (ex.Message.Contains("ORA-00001"))
+                //{
+                //    _vmMsg.Type = Enums.MessageType.Error;
+                //    _vmMsg.Msg = "This Data already Exist.";
+                //}
+                //if (ex.Message.Contains("ORA-01438"))
+                //{
+                //    _vmMsg.Type = Enums.MessageType.Error;
+                //    _vmMsg.Msg = "Value larger than specified precision allowed.";
+                //}
+                //if (ex.Message.Contains("ORA-01400"))
+                //{
+                //    _vmMsg.Type = Enums.MessageType.Error;
+                //    _vmMsg.Msg = "Fill The Required Field.";
+                //}
+                //if (ex.Message.Contains("ORA-02291"))
+                //{
+                //    _vmMsg.Type = Enums.MessageType.Error;
+                //    _vmMsg.Msg = "Please Select Designation & Degree Category";
+                //}
+                //return ex;
+            }
+            return model;
 
         }
 

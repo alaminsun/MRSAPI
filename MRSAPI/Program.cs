@@ -8,6 +8,7 @@ using System.Configuration;
 using System.Text;
 using MRSAPI;
 using System.Reflection;
+using MRSAPI.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,9 +24,11 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<MRSDbContext>();
 builder.Services.AddScoped<DBHelper>();
+builder.Services.AddScoped<IDGenerated>();
 //builder.Services.AddTransient<ISampleRepository,SampleRepository>();
 builder.Services.AddTransient<IDoctorRepository, DoctorRepository>();
 builder.Services.AddTransient<IInstitutionRepository, InstitutionRepository>();
+builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddApiVersioning(options =>
 {
     options.AssumeDefaultVersionWhenUnspecified = true;
@@ -122,7 +125,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 //app.UseApiKeyMiddleware();
 
-app.UseMiddleware<CustomHeaderMiddleware>();
+//app.UseMiddleware<CustomHeaderMiddleware>();
 
 app.UseEndpoints(endpoints =>
 {

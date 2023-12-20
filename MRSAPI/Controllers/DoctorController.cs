@@ -88,7 +88,7 @@ namespace MRSAPI.Controllers
         [HttpGet("[action]")]
         public IActionResult GetDistrictInfo()
         {
-            var data = _doctorRepo.GetUpazilaList();
+            var data = _doctorRepo.GetDistrictList();
             if (data.Count() == 0)
             {
                 return NotFound();
@@ -220,6 +220,29 @@ namespace MRSAPI.Controllers
             return Ok(response);
         }
 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> PostDoctorInformation([FromForm] DoctorInformationAPIModel model)
+        {
 
+            //var data = _doctorRepo.GetDoctorById(fileUpload.DoctorId);
+            //if (data == 0)
+            //{
+            //    return NotFound();
+            //}
+            //if (fileUpload.File != null)
+            //{
+            //    fileUpload.FilePath = await _doctorRepo.SavePostImageAsync(fileUpload);
+            //}
+
+            var postResponse = await _doctorRepo.SaveDoctorInfo(model);
+            // Create the ApiResponse
+            var response = new ApiResponse<DoctorInformationAPIModel>
+            {
+                Message = "Data saved successfully.",
+                Data = postResponse
+            };
+            return Ok(response);
+
+        }
     }
 }
