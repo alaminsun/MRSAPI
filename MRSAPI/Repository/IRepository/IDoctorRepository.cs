@@ -24,5 +24,6 @@ namespace MRSAPI.Repository.IRepository
         List<UpazilaModel> GetUpazilaList();
         List<MarketInfoModel> GetMarketListWithSBU(string marketName);
         Task<DoctorInformationAPIModel> SaveDoctorInfo(DoctorInformationAPIModel model);
+        //Task<bool> SaveDoctorInfo(DoctorInformationAPIModel model);
     }
 }

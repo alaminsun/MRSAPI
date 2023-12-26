@@ -536,7 +536,7 @@ namespace MRSAPI.Repository
                                 {
                                     long DoctorDetailSl = _iDGenerated.getMAXSL("DOC_MKT_DTL_SLNO", "DOC_MKT_DTL");
                                     string query1 = "Insert Into DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE,SBU_UNIT, " +
-                                            " UPAZILA_CODE,MDP_LOC_CODE,EDP_LOC_CODE,INSTI_CODE,ENTRY_DATE,DISTC_CODE) Values(" + DoctorDetailSl + "," + DoctorMstSl + ",'" + detailModel.MarketCode + "','" + detailModel.SBU_UNIT + "', " +
+                                            " UPAZILA_CODE,MDP_LOC_CODE,EDP_LOC_CODE,INSTI_CODE,ENTRY_DATE,DISTC_CODE) Values(" + DoctorDetailSl + "," + DoctorMstSl + ",'" + detailModel.MarketCode + "','" + detailModel.SBUUnit + "', " +
                                             "'" + detailModel.UpazilaCode + "','" + detailModel.MorningLocName + "','" + detailModel.EveningLocName + "'," + detailModel.InstituteCode + ",(TO_DATE('" + CurrentDate + "','dd/MM/yyyy'))," +
                                             "'" + detailModel.DistrictCode + "')";
                                     _dbHelper.CmdExecute(query1);
@@ -578,9 +578,9 @@ namespace MRSAPI.Repository
                         //        "'" + detailModel.ChamberAddress1 + "','" + detailModel.ChamberAddress2 + "','" + detailModel.ChamberAddress3 + "','" + detailModel.ChamberAddress4 + "','" + detailModel.Phone + "', " +
                         //        "'" + detailModel.UpazilaCode + "','" + detailModel.MorningLocCode + "','" + detailModel.EveningLocCode + "'," + detailModel.InstituteCode + ",(TO_DATE('" + model.CurrentDate + "','dd/MM/yyyy')),'" + detailModel.MorningLocTextName + "','" + detailModel.EveningTextLocName + "')";
                         string query1 = "Insert Into DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE,SBU_UNIT, " +
-                                " UPAZILA_CODE,MDP_LOC_CODE,EDP_LOC_CODE,INSTI_CODE,ENTRY_DATE,DISTC_CODE) Values(" + DoctorDetailSl + "," + DoctorMstSl + ",'" + detailModel.MarketCode + "','" + detailModel.SBU_UNIT + "', " +
-                                "'" + detailModel.UpazilaCode + "','" + detailModel.MorningLocName + "','" + detailModel.EveningLocName + "'," + detailModel.InstituteCode + ",(TO_DATE('" + CurrentDate + "','dd/MM/yyyy'))," +
-                                "'" + detailModel.DistrictCode + "')";
+                                " UPAZILA_CODE,MDP_LOC_CODE,EDP_LOC_CODE,INSTI_CODE,ENTRY_DATE,DISTC_CODE) Values(" + DoctorDetailSl + "," + DoctorMstSl + ",'" + detailModel.MarketCode + "','" + detailModel.SBUUnit + "', " +
+                                "'" + detailModel.UpazilaCode + "','" + detailModel.MorningLocName + "','" + detailModel.EveningLocName + "','" + detailModel.InstituteCode + "'," +
+                                "(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')),'" + detailModel.DistrictCode + "')";
                         _dbHelper.CmdExecute(query1);
                         }
                     }
@@ -589,7 +589,7 @@ namespace MRSAPI.Repository
                         foreach (DoctorInSBU detail in model.DoctorInSBUs)
                         {
                         long DoctorSBUId = _iDGenerated.getMAXSL("DOCTOR_SBU_ID", "DOC_MARKET_SBU");
-                        string query = "Insert into DOC_MARKET_SBU(DOCTOR_SBU_ID,DOCTOR_ID,MARKET_CODE,SBU_CODE) Values(" + DoctorSBUId + "," + mxSl + ",'" + detail.MarketCode + "','" + detail.SBUCode +"')";
+                        string query = "Insert into DOC_MARKET_SBU(DOCTOR_SBU_ID,DOCTOR_ID,MARKET_CODE,SBU_UNIT) Values(" + DoctorSBUId + "," + mxSl + ",'" + detail.MarketCode + "','" + detail.SBUUnit + "')";
                             _dbHelper.CmdExecute(query);
                         }
                     }

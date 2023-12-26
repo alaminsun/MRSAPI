@@ -22,7 +22,7 @@ namespace MRSAPI.Controllers
 
         //[HttpGet("{doctorName},{designation}", Name = "GetDoctors")]
         [HttpGet("[action]/{doctorName},{designation},{specialization}")]
-        public IActionResult GetDoctors(string doctorName,string? registrationNo, string? mobileNo, string designation, string specialization)
+        public IActionResult GetDoctors(string doctorName, string? registrationNo, string? mobileNo, string designation, string specialization)
         {
             var data = _doctorRepo.GetDoctorList(doctorName, registrationNo, mobileNo, designation, specialization);
             if (data.Count() == 0)
@@ -48,7 +48,7 @@ namespace MRSAPI.Controllers
 
         [HttpGet("[action]")]
         public IActionResult GetDesignationList()
-        { 
+        {
             var data = _doctorRepo.GetDesignationList();
             if (data.Count() == 0)
             {
@@ -127,7 +127,7 @@ namespace MRSAPI.Controllers
         //[HttpGet("[action]")]
         [HttpGet("[action]/{marketName}")]
         public IActionResult MarketInfo(string marketName)
-        { 
+        {
             var data = _doctorRepo.GetMarketListWithSBU(marketName);
             if (data.Count() == 0)
             {
@@ -155,11 +155,11 @@ namespace MRSAPI.Controllers
             }
             if (fileUpload.File != null)
             {
-                fileUpload.FilePath  = await _doctorRepo.SavePostImageAsync(fileUpload);
+                fileUpload.FilePath = await _doctorRepo.SavePostImageAsync(fileUpload);
             }
 
             var postResponse = await _doctorRepo.CreatePostAsync(fileUpload);
-           // Create the ApiResponse
+            // Create the ApiResponse
             var response = new ApiResponse<FileUploadModel>
             {
                 Message = "Data saved successfully.",
@@ -208,9 +208,9 @@ namespace MRSAPI.Controllers
             {
                 existingItem.FilePath = uniqueFileName;
             }
-    
 
-            var postResponse = await _doctorRepo.UpdatePutAsync(id,existingItem);
+
+            var postResponse = await _doctorRepo.UpdatePutAsync(id, existingItem);
             // Create the ApiResponse
             var response = new ApiResponse<FileUploadModel>
             {
@@ -221,7 +221,7 @@ namespace MRSAPI.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> PostDoctorInformation([FromForm] DoctorInformationAPIModel model)
+        public async Task<IActionResult> PostDoctorInformation([FromBody] DoctorInformationAPIModel model)
         {
 
             //var data = _doctorRepo.GetDoctorById(fileUpload.DoctorId);
@@ -233,15 +233,23 @@ namespace MRSAPI.Controllers
             //{
             //    fileUpload.FilePath = await _doctorRepo.SavePostImageAsync(fileUpload);
             //}
-
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var postResponse = await _doctorRepo.SaveDoctorInfo(model);
             // Create the ApiResponse
+            if (postResponse == null)
+            {
+                return BadRequest(new { message = "Error while saving" });
+            }
             var response = new ApiResponse<DoctorInformationAPIModel>
             {
                 Message = "Data saved successfully.",
                 Data = postResponse
             };
             return Ok(response);
+      
 
         }
     }
