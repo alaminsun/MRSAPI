@@ -347,11 +347,11 @@ namespace MRSAPI.Repository
             return listData;
         }
 
-        public List<MarketInfoModel> GetMarketListWithSBU(string marketName)
+        public List<MarketInfoModel> GetMarketListWithSBU(string? marketName)
         {
             List<MarketInfoModel> listData = new List<MarketInfoModel>();
             string query = "Select MARKET_CODE,MARKET_NAME,SBU_CODE,SBU_UNIT,(MARKET_CODE || '|' || SBU_CODE) Market_SBU_Code,(MARKET_NAME || '|' || SBU_UNIT) Market_SBU_Name  From MARKET Where 1=1";
-            if (marketName != "")
+            if (marketName != "" && marketName!= null)
             {
                 query += " AND UPPER(MARKET_NAME) LIKE '%" + marketName.ToUpper() + "%'";
             }

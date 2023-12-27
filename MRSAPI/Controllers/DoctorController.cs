@@ -125,8 +125,8 @@ namespace MRSAPI.Controllers
         }
 
         //[HttpGet("[action]")]
-        [HttpGet("[action]/{marketName}")]
-        public IActionResult MarketInfo(string marketName)
+        [HttpGet("[action]")]
+        public IActionResult MarketInfo(string? marketName)
         {
             var data = _doctorRepo.GetMarketListWithSBU(marketName);
             if (data.Count() == 0)
