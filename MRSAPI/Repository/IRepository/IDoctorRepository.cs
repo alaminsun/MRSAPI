@@ -15,15 +15,16 @@ namespace MRSAPI.Repository.IRepository
         List<PotentialCategoryModel> GetPotentialCategoryList();
         long GetDoctorById(int doctorId);
         string GetFilePatheWithName(string fileName);
-        FileUploadModel GetDoctorwithFileById(int id);
+        //FileUploadModel GetDoctorwithFileById(int id);
         //Task SavePostImageAsync(FileUploadModel fileUpload);
-        Task<string> SavePostImageAsync(FileUploadModel fileUpload);
-        Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload);
-        Task<FileUploadModel> UpdatePutAsync(int id ,FileUploadModel existingItem);
+        Task<string> SavePostImageAsync(FileUploadModel fileUpload, string FilePath);
+        Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload,string FilePath);
+        //Task<FileUploadModel> UpdatePutAsync(int id ,FileUploadModel existingItem);
         List<DistrictModel> GetDistrictList();
         List<UpazilaModel> GetUpazilaList();
         List<MarketInfoModel> GetMarketListWithSBU(string marketName);
         Task<DoctorInformationAPIModel> SaveDoctorInfo(DoctorInformationAPIModel model);
         //Task<bool> SaveDoctorInfo(DoctorInformationAPIModel model);
+        int GetFileAttachmentId(int doctorId,string attachmentType,string filePath);
     }
 }

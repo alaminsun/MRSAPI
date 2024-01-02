@@ -1,16 +1,37 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MRSAPI.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace MRSAPI.Models
 {
     public class DoctorInformationAPIModel
     {
-        //public int DoctorId { get; set; }
+        [Required]
+        public string EmployeeId { get; set; }
+
+        public DoctorMaster DoctorMasterModels { get; set; }
+
+
+        //public List<DoctorInformationAPIModel>? DoctorInfoModel { get; set; }
+        //public long DoctorMstSl { get; set; }
+
+        //public string MarketCode { get; set; }
+
+        //public string MarketName { get; set; }
+
+        
+    }
+
+    public class DoctorMaster
+    {
+        public long DoctorId;
+
         [Required]
         public string DoctorName { get; set; }
         public string? RegistrationNo { get; set; }
         public string? Gender { get; set; }
         public string? Religion { get; set; }
-        public string? DateOfBirth { get; set; }
+        [CustomDateFormat("dd-MM-yyyy")]
+        public string DateOfBirth { get; set; }
         public string? personalContactNumber { get; set; }
         public string? chamberContactNumber { get; set; }
         public string? Email { get; set; }
@@ -24,17 +45,8 @@ namespace MRSAPI.Models
         public string? DegreeCode { get; set; }
         public string? Remarks { get; set; }
         public List<DoctorMarketDetailsModel>? DoctorMarketDetailsModels { get; set; }
-       //public List<DoctorRelativeInfo> Relatives { get; set; }
+        //public List<DoctorRelativeInfo> Relatives { get; set; }
         public List<DoctorInSBU> DoctorInSBUs { get; set; }
-
-        public List<DoctorInformationAPIModel>? DoctorInfoModel { get; set; }
-        //public long DoctorMstSl { get; set; }
-
-        //public string MarketCode { get; set; }
-
-        //public string MarketName { get; set; }
-
-        
     }
 
     public class DoctorMarketDetailsModel

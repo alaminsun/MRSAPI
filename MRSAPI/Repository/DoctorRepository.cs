@@ -402,7 +402,7 @@ namespace MRSAPI.Repository
         }
 
 
-        public async Task<string> SavePostImageAsync(FileUploadModel fileUpload)
+        public async Task<string> SavePostImageAsync(FileUploadModel fileUpload,string FilePath)
         {
             string uniqueFileName = string.Empty;
             if (fileUpload.File != null)
@@ -421,40 +421,10 @@ namespace MRSAPI.Repository
                 {
                     await fileUpload.File.CopyToAsync(fileStream);
                 }
-                fileUpload.FilePath = filePath;
+                FilePath = filePath;
             }
-            return uniqueFileName;
+            return FilePath;
 
-            //string FileName = string.Empty;
-            //if (fileUpload.File != null)
-            //{
-            //    //string uploadFolder = Path.Combine(_environment.WebRootPath, "Content/Laptop/");
-            //    string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
-            //    //var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
-            //    if (!Directory.Exists(uploadFolder))
-            //    {
-            //        Directory.CreateDirectory(uploadFolder);
-            //    }
-            //    //FileName = Guid.NewGuid().ToString() + "_" + fileUpload.File.FileName;
-            //    FileName = fileUpload.File.FileName;
-            //    string filePath = Path.Combine(uploadFolder, FileName);
-            //    var dbFilePathe = GetFilePatheWithName(filePath);
-            //    //string dbFilePathe = Path.Combine(Directory.GetCurrentDirectory(), deleteFromFolder, data.FilePath);
-            //    if (dbFilePathe == filePath)
-            //    {
-            //        if (System.IO.File.Exists(dbFilePathe))
-            //        {
-            //            System.IO.File.Delete(dbFilePathe);
-            //        }
-            //    }
-            //    //string deleteFromFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
-            //    using (var fileStream = new FileStream(filePath, FileMode.Create))
-            //    {
-            //        await fileUpload.File.CopyToAsync(fileStream);
-            //    }
-            //    fileUpload.FilePath = filePath;
-            //}
-            //return FileName;
 
         }
 
@@ -477,17 +447,18 @@ namespace MRSAPI.Repository
             }
         }
 
-        public async Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload)
+        public async Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload, string FilePath)
         {
             var post = new FileUploadModel
             {
                 DoctorId = fileUpload.DoctorId,
-                FileName = fileUpload.FileName,
-                FileType = fileUpload.FileType,
-                FilePath = fileUpload.FilePath
+                //FileName = fileUpload.FileName,
+                //FileType = fileUpload.FileType,
+                //FilePath = fileUpload.FilePath
+                AttachmentType = fileUpload.AttachmentType
             };
 
-            string saveQuery = "INSERT INTO DOCTOR_FILES (ID,DOCTOR_ID,FILE_TYPE,FILE_PATH,FILE_NAME) VALUES(incremet_id.NEXTVAL," + post.DoctorId + ",'" + post.FileType + "','" + post.FilePath + "','" + post.FileName + "')";
+            string saveQuery = "INSERT INTO DOCTOR_FILES (ID,DOCTOR_ID,FILE_TYPE,FILE_PATH) VALUES(incremet_id.NEXTVAL," + post.DoctorId + ",'" + post.AttachmentType + "','" + FilePath + "')";
             _dbHelper.CmdExecute(saveQuery);
 
             return post;
@@ -505,72 +476,65 @@ namespace MRSAPI.Repository
                 //}
                 //else
                 //{
-                string employeeId = "1000";
+                //string employeeId = "1000";
                 var ip = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
                 string CurrentDate = DateTime.Now.ToString("dd/MM/yyyy");
-                if (model.DoctorInfoModel != null)
-                    {
-                        foreach (DoctorInformationAPIModel docModel in model.DoctorInfoModel)
-                        {
-                            mxSl = _iDGenerated.getMAXSL("DOCTOR_ID", "DOCTOR Where DOCTOR_ID not in (900000)");
-                        //string setOndate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                ////if (model.DoctorInfoModel != null)
+                ////    {
+                //        //foreach (DoctorInformationAPIModel docModel in model.DoctorMasterModels)
+                //        //{
+                //            mxSl = _iDGenerated.getMAXSL("DOCTOR_ID", "DOCTOR Where DOCTOR_ID not in (900000)");
+                //        //string setOndate = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
                        
 
-                        string qry1 = "INSERT INTO DOCTOR (DOCTOR_ID,REGISTRATION_NO,POTENTIAL_CATEGORY,DOCTOR_NAME,DEGREE,DEGREE_CODE,DESIGNATION_CODE,SPECIA_1ST_CODE,GENDER,RELIGION,DATE_OF_BIRTH,DOC_PERS_PHONE, " +
-                                         "DOCTOR_EMAIL,PATIENT_PER_DAY,AVG_PRESC_VALUE,ADDRESS1,REMARKS,ENTERED_BY,ENTERED_DATE,ENTERED_TERMINAL)" +
-                            "VALUES(" + mxSl + ", '" + docModel.RegistrationNo + "', '" + docModel.PotentialCategory + "', '" + docModel.DoctorName + "','" + docModel.DegreeTitle + "', " +
-                            "'" + docModel.DegreeCode + "','" + docModel.DesignationCode + "','" + docModel.SpecializationCode + "'," +
-                            "'" + docModel.Gender + "','" + docModel.Religion + "',(TO_DATE('" + docModel.DateOfBirth + "','dd-MM-yyyy')),'" + docModel.personalContactNumber + "','" + docModel.Email + "','" + docModel.PatientNoPerDay + "','" + docModel.ValuePerPrescription + "'," +
-                            "'" + docModel.Address + "','" + docModel.Remarks + "','" + employeeId + "'," +
-                            "(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')),'" + ip + "')";
+                //        string qry1 = "INSERT INTO DOCTOR (DOCTOR_ID,REGISTRATION_NO,POTENTIAL_CATEGORY,DOCTOR_NAME,DEGREE,DEGREE_CODE,DESIGNATION_CODE,SPECIA_1ST_CODE,GENDER,RELIGION,DATE_OF_BIRTH,DOC_PERS_PHONE, " +
+                //                         "DOCTOR_EMAIL,PATIENT_PER_DAY,AVG_PRESC_VALUE,ADDRESS1,REMARKS,ENTERED_BY,ENTERED_DATE,ENTERED_TERMINAL)" +
+                //            "VALUES(" + mxSl + ", '" + model.DoctorMasterModels.RegistrationNo + "', '" + model.DoctorMasterModels.PotentialCategory + "', '" + model.DoctorMasterModels.DoctorName + "','" + model.DoctorMasterModels.DegreeTitle + "', " +
+                //            "'" + model.DoctorMasterModels.DegreeCode + "','" + model.DoctorMasterModels.DesignationCode + "','" + model.DoctorMasterModels.SpecializationCode + "'," +
+                //            "'" + model.DoctorMasterModels.Gender + "','" + model.DoctorMasterModels.Religion + "',(TO_DATE('" + model.DoctorMasterModels.DateOfBirth + "','dd-MM-yyyy')),'" + model.DoctorMasterModels.personalContactNumber + "','" + model.DoctorMasterModels.Email + "','" + model.DoctorMasterModels.PatientNoPerDay + "','" + model.DoctorMasterModels.ValuePerPrescription + "'," +
+                //            "'" + model.DoctorMasterModels.Address + "','" + model.DoctorMasterModels.Remarks + "','" + model.EmployeeId + "'," +
+                //            "(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')),'" + ip + "')";
 
-                            _dbHelper.CmdExecute(qry1);
+                //            _dbHelper.CmdExecute(qry1);
 
-                            if (model.DoctorMarketDetailsModels != null)
-                            {
-                                long DoctorMstSl = _iDGenerated.getMAXSL("DOC_MKT_MAS_SLNO", "DOC_MKT_MAS");
-                                string query = "Insert into DOC_MKT_MAS(DOC_MKT_MAS_SLNO,DOCTOR_ID)values(" + DoctorMstSl + "," + mxSl + ")";
-                                _dbHelper.CmdExecute(query);
+                //            if (model.DoctorMasterModels.DoctorMarketDetailsModels != null)
+                //            {
+                //                long DoctorMstSl = _iDGenerated.getMAXSL("DOC_MKT_MAS_SLNO", "DOC_MKT_MAS");
+                //                string query = "Insert into DOC_MKT_MAS(DOC_MKT_MAS_SLNO,DOCTOR_ID)values(" + DoctorMstSl + "," + mxSl + ")";
+                //                _dbHelper.CmdExecute(query);
 
-                                foreach (var detailModel in model.DoctorMarketDetailsModels)
-                                {
-                                    long DoctorDetailSl = _iDGenerated.getMAXSL("DOC_MKT_DTL_SLNO", "DOC_MKT_DTL");
-                                    string query1 = "Insert Into DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE,SBU_UNIT, " +
-                                            " UPAZILA_CODE,MDP_LOC_CODE,EDP_LOC_CODE,INSTI_CODE,ENTRY_DATE,DISTC_CODE) Values(" + DoctorDetailSl + "," + DoctorMstSl + ",'" + detailModel.MarketCode + "','" + detailModel.SBUUnit + "', " +
-                                            "'" + detailModel.UpazilaCode + "','" + detailModel.MorningLocName + "','" + detailModel.EveningLocName + "'," + detailModel.InstituteCode + ",(TO_DATE('" + CurrentDate + "','dd/MM/yyyy'))," +
-                                            "'" + detailModel.DistrictCode + "')";
-                                    _dbHelper.CmdExecute(query1);
-                                }
-                            }
-                        }
+                //                foreach (var detailModel in model.DoctorMasterModels.DoctorMarketDetailsModels)
+                //                {
+                //                    long DoctorDetailSl = _iDGenerated.getMAXSL("DOC_MKT_DTL_SLNO", "DOC_MKT_DTL");
+                //                    string query1 = "Insert Into DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE,SBU_UNIT, " +
+                //                            " UPAZILA_CODE,MDP_LOC_CODE,EDP_LOC_CODE,INSTI_CODE,ENTRY_DATE,DISTC_CODE) Values(" + DoctorDetailSl + "," + DoctorMstSl + ",'" + detailModel.MarketCode + "','" + detailModel.SBUUnit + "', " +
+                //                            "'" + detailModel.UpazilaCode + "','" + detailModel.MorningLocName + "','" + detailModel.EveningLocName + "'," + detailModel.InstituteCode + ",(TO_DATE('" + CurrentDate + "','dd/MM/yyyy'))," +
+                //                            "'" + detailModel.DistrictCode + "')";
+                //                    _dbHelper.CmdExecute(query1);
+                //                }
+                //            }
+                        //}
 
-                    }
+                    //}
                     mxSl = _iDGenerated.getMAXSL("DOCTOR_ID", "DOCTOR Where DOCTOR_ID not in (900000)");
 
-                //string qry = "INSERT INTO DOCTOR (DOCTOR_ID,REGISTRATION_NO,POTENTIAL_CATEGORY,HONORARIUM,DOCTOR_NAME,DEGREE,DEGREE_CODE,DESIGNATION,DESIGNATION_CODE,SPECIA_1ST_CODE,SPECIA_2ND_CODE,GENDER,RELIGION,DATE_OF_BIRTH,DOC_PERS_PHONE, " +
-                //             "DOCTOR_EMAIL,PATIENT_PER_DAY,AVG_PRESC_VALUE,PRESC_SHARE,ADDRESS1,ADDRESS2,ADDRESS3,ADDRESS4,REMARKS,ENTERED_BY,ENTERED_DATE,ENTERED_TERMINAL)" +
-                //"VALUES(" + mxSl + ", '" + model.RegistrationNo + "', '" + model.PotentialCategory + "', '" + model.Honorium + "', '" + model.DoctorName + "','" + model.Degree + "', " +
-                //"'" + model.DegreeCategory + "','" + model.Designation + "','" + model.DesignationCategory + "','" + model.SpeciFirstCode + "','" + model.SpeciSecondCode + "'," +
-                //"'" + model.Gender + "','" + model.Religion + "',(TO_DATE('" + model.DateOfBirth + "','dd-MM-yyyy')),'" + model.Phone + "','" + model.Email + "','" + model.PatientNo + "','" + model.PrescriptionValue + "'," +
-                //"'" + model.PrescriptionShare + "','" + model.Address1 + "','" + model.Address2 + "','" + model.Address3 + "','" + model.Address4 + "','" + model.Remarks + "','" + employeeId + "'," +
-                //"(TO_DATE('" + model.CurrentDate + "','dd/MM/yyyy')),'" + ip + "')";
                 string qry = "INSERT INTO DOCTOR (DOCTOR_ID,REGISTRATION_NO,POTENTIAL_CATEGORY,DOCTOR_NAME,DEGREE,DEGREE_CODE,DESIGNATION_CODE,SPECIA_1ST_CODE,GENDER,RELIGION,DATE_OF_BIRTH,DOC_PERS_PHONE, " +
                                  "DOCTOR_EMAIL,PATIENT_PER_DAY,AVG_PRESC_VALUE,ADDRESS1,REMARKS,ENTERED_BY,ENTERED_DATE,ENTERED_TERMINAL)" +
-                    "VALUES(" + mxSl + ", '" + model.RegistrationNo + "', '" + model.PotentialCategory + "', '" + model.DoctorName + "','" + model.DegreeTitle + "', " +
-                    "'" + model.DegreeCode + "','" + model.DesignationCode + "','" + model.SpecializationCode + "'," +
-                    "'" + model.Gender + "','" + model.Religion + "',(TO_DATE('" + model.DateOfBirth + "','dd-MM-yyyy')),'" + model.personalContactNumber + "','" + model.Email + "','" + model.PatientNoPerDay + "','" + model.ValuePerPrescription + "'," +
-                    "'" + model.Address + "','" + model.Remarks + "','" + employeeId + "'," +
+                    "VALUES(" + mxSl + ", '" + model.DoctorMasterModels.RegistrationNo + "', '" + model.DoctorMasterModels.PotentialCategory + "', '" + model.DoctorMasterModels.DoctorName + "','" + model.DoctorMasterModels.DegreeTitle + "', " +
+                    "'" + model.DoctorMasterModels.DegreeCode + "','" + model.DoctorMasterModels.DesignationCode + "','" + model.DoctorMasterModels.SpecializationCode + "'," +
+                    "'" + model.DoctorMasterModels.Gender + "','" + model.DoctorMasterModels.Religion + "',(TO_DATE('" + model.DoctorMasterModels.DateOfBirth + "','dd-MM-yyyy')),'" + model.DoctorMasterModels.personalContactNumber + "','" + model.DoctorMasterModels.Email + "','" + model.DoctorMasterModels.PatientNoPerDay + "','" + model.DoctorMasterModels.ValuePerPrescription + "'," +
+                    "'" + model.DoctorMasterModels.Address + "','" + model.DoctorMasterModels.Remarks + "','" + model.EmployeeId + "'," +
                     "(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')),'" + ip + "')";
 
                 _dbHelper.CmdExecute(qry);
 
-                    if (model.DoctorMarketDetailsModels != null)
+                    if (model.DoctorMasterModels.DoctorMarketDetailsModels != null)
                     {
                         long DoctorMstSl = _iDGenerated.getMAXSL("DOC_MKT_MAS_SLNO", "DOC_MKT_MAS");
                         string query = "Insert into DOC_MKT_MAS(DOC_MKT_MAS_SLNO,DOCTOR_ID)values(" + DoctorMstSl + "," + mxSl + ")";
                         _dbHelper.CmdExecute(query);
 
-                        foreach (var detailModel in model.DoctorMarketDetailsModels)
+                        foreach (var detailModel in model.DoctorMasterModels.DoctorMarketDetailsModels)
                         {
                             long DoctorDetailSl = _iDGenerated.getMAXSL("DOC_MKT_DTL_SLNO", "DOC_MKT_DTL");
                         //string query1 = "Insert Into DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE,SBU_UNIT,CHAMB_ADDRESS1,CHAMB_ADDRESS2,CHAMB_ADDRESS3,CHAMB_ADDRESS4,CHAMB_PHONE, " +
@@ -584,9 +548,9 @@ namespace MRSAPI.Repository
                         _dbHelper.CmdExecute(query1);
                         }
                     }
-                    if (model.DoctorInSBUs != null)
+                    if (model.DoctorMasterModels.DoctorInSBUs != null)
                     {
-                        foreach (DoctorInSBU detail in model.DoctorInSBUs)
+                        foreach (DoctorInSBU detail in model.DoctorMasterModels.DoctorInSBUs)
                         {
                         long DoctorSBUId = _iDGenerated.getMAXSL("DOCTOR_SBU_ID", "DOC_MARKET_SBU");
                         string query = "Insert into DOC_MARKET_SBU(DOCTOR_SBU_ID,DOCTOR_ID,MARKET_CODE,SBU_UNIT) Values(" + DoctorSBUId + "," + mxSl + ",'" + detail.MarketCode + "','" + detail.SBUUnit + "')";
@@ -594,9 +558,11 @@ namespace MRSAPI.Repository
                         }
                     }
 
+                    model.DoctorMasterModels.DoctorId = mxSl;
+
                     //_vmMsg.Type = Enums.MessageType.Success;
                     //_vmMsg.Msg = "Saved Successfully.";
-                //}
+                    //}
 
 
             }
@@ -633,51 +599,51 @@ namespace MRSAPI.Repository
         }
 
 
-        public async Task<FileUploadModel> UpdatePutAsync(int id,FileUploadModel existingItem)
-        {
-            var put = new FileUploadModel
-            {
-                //DoctorId = fileUpload.DoctorId,
-                FileName = existingItem.FileName,
-                FileType = existingItem.FileType,
-                FilePath = existingItem.FilePath,
-            };
+        //public async Task<FileUploadModel> UpdatePutAsync(int id,FileUploadModel existingItem)
+        //{
+        //    var put = new FileUploadModel
+        //    {
+        //        //DoctorId = fileUpload.DoctorId,
+        //        FileName = existingItem.FileName,
+        //        FileType = existingItem.FileType,
+        //        FilePath = existingItem.FilePath,
+        //    };
 
-            string saveQuery = "UPDATE DOCTOR_FILES SET FILE_NAME='" + put.FileName + "', FILE_TYPE='" + put.FileType + "',FILE_PATH='" + put.FilePath + "' WHERE ID= " + id + ""; 
-            _dbHelper.CmdExecute(saveQuery);
-
-
-            return put;
-        }
+        //    string saveQuery = "UPDATE DOCTOR_FILES SET FILE_NAME='" + put.FileName + "', FILE_TYPE='" + put.FileType + "',FILE_PATH='" + put.FilePath + "' WHERE ID= " + id + ""; 
+        //    _dbHelper.CmdExecute(saveQuery);
 
 
+        //    return put;
+        //}
 
-        public FileUploadModel GetDoctorwithFileById(int id)
-        {
-            FileUploadModel model = new FileUploadModel();
-            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
-            {
-                string query = "Select * from DOCTOR_FILES Where ID = " + id + "";
-                //long doctor_Id = 0;
-                OracleCommand cmd = new OracleCommand(query, con);
-                con.Open();
-                using (OracleDataReader reader = cmd.ExecuteReader())
-                {
 
-                    while (reader.Read())
-                    {
+
+        //public FileUploadModel GetDoctorwithFileById(int id)
+        //{
+        //    FileUploadModel model = new FileUploadModel();
+        //    using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+        //    {
+        //        string query = "Select * from DOCTOR_FILES Where ID = " + id + "";
+        //        //long doctor_Id = 0;
+        //        OracleCommand cmd = new OracleCommand(query, con);
+        //        con.Open();
+        //        using (OracleDataReader reader = cmd.ExecuteReader())
+        //        {
+
+        //            while (reader.Read())
+        //            {
                         
-                        model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
-                        model.FileName = reader["FILE_NAME"].ToString();
-                        //model.FileType = (FileType)Convert.ToInt32(reader["FILE_TYPE"]);
-                        model.FilePath = reader["FILE_PATH"].ToString();
-                    }
+        //                model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
+        //                model.FileName = reader["FILE_NAME"].ToString();
+        //                //model.FileType = (FileType)Convert.ToInt32(reader["FILE_TYPE"]);
+        //                model.FilePath = reader["FILE_PATH"].ToString();
+        //            }
                    
-                }
-            }
-            return model;
+        //        }
+        //    }
+        //    return model;
 
-        }
+        //}
 
         public long GetDoctorById(int doctorId)
         {
@@ -692,14 +658,50 @@ namespace MRSAPI.Repository
                     while (reader.Read())
                     {
                         doctor_Id = Convert.ToInt32(reader["DOCTOR_ID"]);
-                        //model.FileName = reader["FILE_NAME"].ToString();
-                        ////model.FileType = (FileType)Convert.ToInt32(reader["FILE_TYPE"]);
-                        //model.FilePath = reader["FILE_PATH"].ToString();
                     }
                     return doctor_Id;
                 }
             }
 
+        }
+
+        public int GetFileAttachmentId(int doctorId, string attachmentType, string filePath)
+        {
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                string query = "Select * from DOCTOR_FILES Where 1 = 1";
+
+                if (attachmentType != null && filePath == null)
+                {
+                    query += " AND DOCTOR_ID = "+ doctorId + " And FILE_TYPE = '"+ attachmentType + "'";
+                }
+                else if (attachmentType == null && filePath!= null)
+                {
+                    query += " AND DOCTOR_ID = " + doctorId + " And FILE_PATH = '" + filePath + "'";
+                }
+                else if (attachmentType != null && filePath != null)
+                {
+                    query += " AND DOCTOR_ID = " + doctorId + " And FILE_PATH = '" + filePath + "' And FILE_TYPE = '"+ attachmentType + "'";
+                }
+                else if (attachmentType == null && filePath == null)
+                {
+                    query += " AND DOCTOR_ID = " + doctorId + "";
+                }
+                int Id = 0;
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Id = Convert.ToInt32(reader["ID"]);
+                        //model.FileName = reader["FILE_NAME"].ToString();
+                        ////model.FileType = (FileType)Convert.ToInt32(reader["FILE_TYPE"]);
+                        //model.FilePath = reader["FILE_PATH"].ToString();
+                    }
+                    return Id;
+                }
+            }
         }
 
     }
