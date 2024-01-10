@@ -1,18 +1,9 @@
-﻿
-using Microsoft.Extensions.Hosting;
-using MRSAPI.Data;
+﻿using MRSAPI.Data;
 using MRSAPI.Gateway;
 using MRSAPI.Helpers;
 using MRSAPI.Models;
 using MRSAPI.Repository.IRepository;
 using Oracle.ManagedDataAccess.Client;
-using System;
-using System.Data;
-using System.Data.Common;
-using System.IO;
-using System.Net;
-using System.Numerics;
-using System.Reflection;
 
 namespace MRSAPI.Repository
 {
@@ -452,9 +443,6 @@ namespace MRSAPI.Repository
             var post = new FileUploadModel
             {
                 DoctorId = fileUpload.DoctorId,
-                //FileName = fileUpload.FileName,
-                //FileType = fileUpload.FileType,
-                //FilePath = fileUpload.FilePath
                 AttachmentType = fileUpload.AttachmentType
             };
 
@@ -569,14 +557,19 @@ namespace MRSAPI.Repository
 
             catch (Exception ex)
             {
+
                 //_vmMsg.Type = Enums.MessageType.Error;
                 //_vmMsg.Msg = "Failed to save.";
 
-                //if (ex.Message.Contains("ORA-00001"))
-                //{
-                //    _vmMsg.Type = Enums.MessageType.Error;
-                //    _vmMsg.Msg = "This Data already Exist.";
-                //}
+                if (ex.Message.Contains("ORA-00001"))
+                {
+                    Console.WriteLine("An error occurred: " + ex.Message);
+                }
+                if (ex.Message.Contains("ORA-12899"))
+                {
+                    Console.WriteLine("An error occurred: " + ex.Message);
+                }
+                
                 //if (ex.Message.Contains("ORA-01438"))
                 //{
                 //    _vmMsg.Type = Enums.MessageType.Error;

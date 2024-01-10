@@ -226,7 +226,7 @@ namespace MRSAPI.Controllers
                 }
                 var postResponse = await _doctorRepo.SaveDoctorInfo(model);
                 // Create the ApiResponse
-                if (postResponse == null)
+                if (postResponse.DoctorMasterModels.DoctorId == 0)
                 {
                     return BadRequest(new { message = "Error while saving" });
                 }
