@@ -250,7 +250,7 @@ namespace MRSAPI.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> DeadDoctorLinkedMarket([FromBody] DeadDoctorLocationModel model)
+        public async Task<IActionResult> DoctorLinkedMarket([FromBody] DeadDoctorModel model)
         {
             try
             {
@@ -275,6 +275,51 @@ namespace MRSAPI.Controllers
                 // Return a 500 Internal Server Error response
                 return StatusCode(500, new { Message = "An error occurred while saving the data." });
             }
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> DoctorShiftMarket([FromBody] DoctorShiftModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var postResponse = await _doctorRepo.DoctorShiftMarket(model);
+                // Create the ApiResponse
+                if (postResponse.Id == 0)
+                {
+                    return BadRequest(new { message = "Error while saving" });
+                }
+                //return Ok(response);
+                return Ok(new { Message = "Data saved successfully.", postResponse.Id });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you may want to log it to a file or another storage)
+                Console.WriteLine(ex.Message);
+
+                // Return a 500 Internal Server Error response
+                return StatusCode(500, new { Message = "An error occurred while saving the data." });
+            }
+        }
+        [HttpDelete("[action]")]
+        public IActionResult DeleteDoctorMarket(int Id)
+        {
+            if (!_doctorRepo.MarketExist(Id))
+            {
+                return NotFound();
+            }
+            var Obj = _doctorRepo.GetMarketById(Id);
+
+            if (!_doctorRepo.DeleteMarketWithDocotor(Obj))
+            {
+                ModelState.AddModelError("", $"Something went wrong when deleting the record {Obj}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
         }
     }
 }

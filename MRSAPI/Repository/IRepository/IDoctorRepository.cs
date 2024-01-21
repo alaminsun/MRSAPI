@@ -26,6 +26,10 @@ namespace MRSAPI.Repository.IRepository
         Task<DoctorInformationAPIModel> SaveDoctorInfo(DoctorInformationAPIModel model);
         //Task<bool> SaveDoctorInfo(DoctorInformationAPIModel model);
         int GetFileAttachmentId(int doctorId,string attachmentType,string filePath);
-        Task<DeadDoctorLocationModel> LinkDoctorWithMarket(DeadDoctorLocationModel model);
+        Task<DeadDoctorModel> LinkDoctorWithMarket(DeadDoctorModel model);
+        Task<DoctorShiftModel> DoctorShiftMarket(DoctorShiftModel model);
+        bool MarketExist(int id);
+        DoctorShiftModel GetMarketById(int id);
+        bool DeleteMarketWithDocotor(DoctorShiftModel obj);
     }
 }

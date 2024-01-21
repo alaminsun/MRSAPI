@@ -45,5 +45,35 @@ namespace MRSAPI.Gateway
             //oracleConnection.Close();
             //return noOfRows;
         }
+
+
+    public T ExecuteScalar<T>(string query, object parameters = null)
+    {
+        using (OracleConnection connection = new OracleConnection(_db.GetConnectionString()))
+        {
+            connection.Open();
+
+            using (OracleCommand command = new OracleCommand(query, connection))
+            {
+                // Add parameters if any
+                if (parameters != null)
+                {
+                    foreach (var prop in parameters.GetType().GetProperties())
+                    {
+                        OracleParameter oracleParameter = new OracleParameter(":" + prop.Name, prop.GetValue(parameters));
+                        command.Parameters.Add(oracleParameter);
+                    }
+                }
+
+                // Execute the command and return the scalar value
+                object result = command.ExecuteScalar();
+
+                // Convert the result to the desired type
+                return (T)Convert.ChangeType(result, typeof(T));
+            }
+        }
     }
+
+
+}
 }
