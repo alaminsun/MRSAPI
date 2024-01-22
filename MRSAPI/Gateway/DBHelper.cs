@@ -47,6 +47,8 @@ namespace MRSAPI.Gateway
         }
 
 
+
+
     public T ExecuteScalar<T>(string query, object parameters = null)
     {
         using (OracleConnection connection = new OracleConnection(_db.GetConnectionString()))
@@ -73,6 +75,7 @@ namespace MRSAPI.Gateway
             }
         }
     }
+
 
 
 }

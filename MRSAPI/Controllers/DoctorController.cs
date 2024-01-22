@@ -315,11 +315,12 @@ namespace MRSAPI.Controllers
 
             if (!_doctorRepo.DeleteMarketWithDocotor(Obj))
             {
-                ModelState.AddModelError("", $"Something went wrong when deleting the record {Obj}");
+                ModelState.AddModelError("", $"Something went wrong when deleting the record {Obj.MarketCode}");
                 return StatusCode(500, ModelState);
             }
 
-            return NoContent();
+            //return NoContent();
+            return Ok(new { Message = "Data deleted successfully.", Id });
         }
     }
 }

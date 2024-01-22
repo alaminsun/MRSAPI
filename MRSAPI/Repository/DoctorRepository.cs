@@ -4,6 +4,8 @@ using MRSAPI.Helpers;
 using MRSAPI.Models;
 using MRSAPI.Repository.IRepository;
 using Oracle.ManagedDataAccess.Client;
+using System.Data;
+using System.Reflection;
 
 namespace MRSAPI.Repository
 {
@@ -228,7 +230,7 @@ namespace MRSAPI.Repository
                     while (reader.Read())
                     {
                         DesignationModel model = new DesignationModel();
-                        model.DESIGNATION_CODE = Convert.ToInt32(reader["DESIGNATION_CODE"]);
+                        model.DESIGNATION_CODE = reader["DESIGNATION_CODE"].ToString();
                         model.DESIGNATION_NAME = reader["DESIGNATION"].ToString();
                         listData.Add(model);
                     }
@@ -251,7 +253,7 @@ namespace MRSAPI.Repository
                     while (reader.Read())
                     {
                         SpecializationModel model = new SpecializationModel();
-                        model.SPECIALIZATION_CODE = Convert.ToInt32(reader["SPECIALIZATION_CODE"]);
+                        model.SPECIALIZATION_CODE = reader["SPECIALIZATION_CODE"].ToString();
                         model.SPECIALIZATION_NAME = reader["SPECIALIZATION"].ToString();
                         listData.Add(model);
                     }
@@ -372,7 +374,10 @@ namespace MRSAPI.Repository
         public List<UpazilaModel> GetUpazilaList()
         {
             List<UpazilaModel> listData = new List<UpazilaModel>();
-            string query = "Select UPAZILA_CODE,UPAZILA_NAME From UPAZILA";
+            string query = "Select DUM.DISTC_UPAZILA_MAS_SLNO,DUM.DISTC_CODE, D.DISTC_NAME, DUD.UPAZILA_CODE, " +
+                " U.UPAZILA_NAME from DISTC_UPAZILA_MAS DUM, DISTC_UPAZILA_DTL DUD,UPAZILA U,DISTRICT D" +
+                " Where DUM.DISTC_UPAZILA_MAS_SLNO = DUD.DISTC_UPAZILA_MAS_SLNO" +
+                " AND DUM.DISTC_CODE = D.DISTC_CODE AND DUD.UPAZILA_CODE = U.UPAZILA_CODE";
 
             using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
             {
@@ -383,6 +388,8 @@ namespace MRSAPI.Repository
                     while (reader.Read())
                     {
                         UpazilaModel model = new UpazilaModel();
+                        model.DistrictCode = reader["DISTC_CODE"].ToString();
+                        model.DistrictName = reader["DISTC_NAME"].ToString();
                         model.UpazilaCode = reader["UPAZILA_CODE"].ToString();
                         model.UpazilaName = reader["UPAZILA_NAME"].ToString();
                         listData.Add(model);
@@ -597,7 +604,7 @@ namespace MRSAPI.Repository
                     {
                         long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
                         string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,APRROVAL_STATUS,CREATED_DATETIME)" +
-                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode +"','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "','" + detailModel.ApprovalStatus + "',(TO_DATE('" + model.CreationDate + "','dd-MM-yyyy')))";
+                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "','" + detailModel.ApprovalStatus + "',(TO_DATE('" + model.CreationDate + "','dd-MM-yyyy')))";
 
                         _dbHelper.CmdExecute(query1);
                     }
@@ -663,12 +670,11 @@ namespace MRSAPI.Repository
         public bool MarketExist(int id)
         {
 
-            string query = "SELECT COUNT(*) FROM Doctor WHERE DOCTOR_ID = @DoctorID";
-
-            // Assume dbHelper is an instance of your database helper class with a method ExecuteScalar
-            int rowCount = _dbHelper.ExecuteScalar<int>(query, new { DoctorID = id });
-
+            string query = "SELECT COUNT(*) FROM OPERATIONS_MASTER WHERE ID = " + id + "";
+            DataTable dt = _dbHelper.GetDataTable(query);
+            int rowCount = dt.Rows.Count;
             return rowCount > 0;
+
         }
 
 
@@ -690,32 +696,89 @@ namespace MRSAPI.Repository
 
 
 
-        //public FileUploadModel GetDoctorwithFileById(int id)
-        //{
-        //    FileUploadModel model = new FileUploadModel();
-        //    using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
-        //    {
-        //        string query = "Select * from DOCTOR_FILES Where ID = " + id + "";
-        //        //long doctor_Id = 0;
-        //        OracleCommand cmd = new OracleCommand(query, con);
-        //        con.Open();
-        //        using (OracleDataReader reader = cmd.ExecuteReader())
-        //        {
+        public DoctorShiftModel GetMarketById(int id)
+        {
+            DoctorShiftModel model = new DoctorShiftModel();
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                string query = "Select * from OPERATIONS_MASTER Where ID = " + id + "";
+                //long doctor_Id = 0;
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
 
-        //            while (reader.Read())
-        //            {
+                    while (reader.Read())
+                    {
+                        model.Id = Convert.ToInt32(reader["ID"]);
+                        model.EmployeeId = reader["EMPLOYEE_ID"].ToString();
+                        model.MarketCode = reader["MARKET_CODE"].ToString();
+                        model.OperationType = reader["OPERATION_TYPE"].ToString();
+                        model.FromMarket = reader["FROM_MARKET"].ToString();
+                        model.ToMarket = reader["TO_MARKET"].ToString();
+                        model.Status = reader["STATUS"].ToString();
+                        model.Remarkes = reader["REMARK"].ToString();
+                        model.ApprovedBy = reader["APPROVED_BY"].ToString();
+                        model.deadDoctorInfoModels = GetDoctorListById(id);
+                        model.doctorSupervisorInfoModels = GetSupervisorInfoById(id);
+                    }
 
-        //                model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
-        //                model.FileName = reader["FILE_NAME"].ToString();
-        //                //model.FileType = (FileType)Convert.ToInt32(reader["FILE_TYPE"]);
-        //                model.FilePath = reader["FILE_PATH"].ToString();
-        //            }
+                }
+            }
+            return model;
 
-        //        }
-        //    }
-        //    return model;
+        }
 
-        //}
+        private List<DoctorSupervisorInfoModel> GetSupervisorInfoById(int id)
+        {
+            List<DoctorSupervisorInfoModel> listData = new List<DoctorSupervisorInfoModel>();
+            string query = "Select OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,APRROVAL_STATUS,CREATED_DATETIME,UPDATED_DATETIME From OPERATION_SUPERVISORS Where OPERATION_MASTER_ID = " + id + "";
+
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        DoctorSupervisorInfoModel model = new DoctorSupervisorInfoModel();
+                        model.EmployeeId = reader["EMPLOYEE_ID"].ToString();
+                        model.TerritoryCode = reader["TERITORY_CODE"].ToString();
+                        model.MarketCode = reader["MARKET_CODE"].ToString();
+                        model.IsSupervisor = reader["IS_SUPERVISOR"].ToString();
+                        model.Remarkes = reader["REMARKS"].ToString();
+                        model.ApprovalStatus = reader["APRROVAL_STATUS"].ToString();
+                        //model.UpazilaName = reader["UPAZILA_NAME"].ToString();
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
+        }
+
+        private List<DeadDoctorInfoModel> GetDoctorListById(int id)
+        {
+            List<DeadDoctorInfoModel> listData = new List<DeadDoctorInfoModel>();
+            string query = "Select OPERATION_MASTER_ID,DOCTOR_ID From OPERATION_DOCTORS Where OPERATION_MASTER_ID = "+id+"";
+
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        DeadDoctorInfoModel model = new DeadDoctorInfoModel();
+                        model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
+                        //model.UpazilaName = reader["UPAZILA_NAME"].ToString();
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
+        }
 
         public long GetDoctorById(int doctorId)
         {
@@ -773,14 +836,40 @@ namespace MRSAPI.Repository
             }
         }
 
-        public DoctorShiftModel GetMarketById(int id)
-        {
-            throw new NotImplementedException();
-        }
+        //public DoctorShiftModel GetMarketById(int id)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public bool DeleteMarketWithDocotor(DoctorShiftModel obj)
         {
-            throw new NotImplementedException();
+            if (obj.doctorSupervisorInfoModels != null)
+            {
+                foreach (var detailModel in obj.doctorSupervisorInfoModels)
+                {
+                    string query1 = "Delete from OPERATION_SUPERVISORS Where OPERATION_MASTER_ID = " + obj.Id + "";
+
+                    _dbHelper.CmdExecute(query1);
+                }
+            }
+            if (obj.deadDoctorInfoModels != null)
+            {
+                foreach (var detailModel in obj.deadDoctorInfoModels)
+                {
+                    string query2 = "Delete from OPERATION_DOCTORS Where OPERATION_MASTER_ID = " + obj.Id + "";
+                    _dbHelper.CmdExecute(query2);
+
+
+                }
+            }
+
+            string query3 = "Delete from OPERATIONS_MASTER Where ID = " + obj.Id + "";
+            if (_dbHelper.CmdExecute(query3) > 0)
+            {
+                return true;
+            }
+            else { return false; }
+
         }
     }
 }
