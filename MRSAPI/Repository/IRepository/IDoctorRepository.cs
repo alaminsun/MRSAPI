@@ -17,19 +17,21 @@ namespace MRSAPI.Repository.IRepository
         string GetFilePatheWithName(string fileName);
         //FileUploadModel GetDoctorwithFileById(int id);
         //Task SavePostImageAsync(FileUploadModel fileUpload);
-        Task<string> SavePostImageAsync(FileUploadModel fileUpload, string FilePath);
-        Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload,string FilePath);
+        Task<List<string>> SavePostImageAsync(FileUploadModel fileUpload);
+        Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload, List<string> FilePathList);
         //Task<FileUploadModel> UpdatePutAsync(int id ,FileUploadModel existingItem);
         List<DistrictModel> GetDistrictList();
         List<UpazilaModel> GetUpazilaList();
         List<MarketInfoModel> GetMarketListWithSBU(string marketName);
         Task<DoctorInformationAPIModel> SaveDoctorInfo(DoctorInformationAPIModel model);
         //Task<bool> SaveDoctorInfo(DoctorInformationAPIModel model);
-        int GetFileAttachmentId(int doctorId,string attachmentType,string filePath);
-        Task<DeadDoctorModel> LinkDoctorWithMarket(DeadDoctorModel model);
-        Task<DoctorShiftModel> DoctorShiftMarket(DoctorShiftModel model);
+        int GetFileAttachmentId(int doctorId,string attachmentType);
+        Task<DeadDoctorRequestModel> LinkDoctorWithMarket(DeadDoctorRequestModel model);
+        Task<DoctorShiftRequestModel> DoctorShiftMarket(DoctorShiftRequestModel model);
         bool MarketExist(int id);
-        DoctorShiftModel GetMarketById(int id);
-        bool DeleteMarketWithDocotor(DoctorShiftModel obj);
+        DoctorShiftRequestModel GetMarketById(int id);
+        bool DeleteMarketWithDocotor(DoctorShiftRequestModel obj);
+        Task<bool> DoctorLinkWithMarket(DoctorLinkRequestModel model);
+        //Task CreatePostAsync(FileUploadModel fileUpload, List<string>? filePath);
     }
 }

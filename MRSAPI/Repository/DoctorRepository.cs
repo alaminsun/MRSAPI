@@ -1,4 +1,5 @@
-﻿using MRSAPI.Data;
+﻿using Microsoft.OpenApi.Models;
+using MRSAPI.Data;
 using MRSAPI.Gateway;
 using MRSAPI.Helpers;
 using MRSAPI.Models;
@@ -400,29 +401,34 @@ namespace MRSAPI.Repository
         }
 
 
-        public async Task<string> SavePostImageAsync(FileUploadModel fileUpload, string FilePath)
+        public async Task<List<string>> SavePostImageAsync(FileUploadModel fileUpload)
         {
-            string uniqueFileName = string.Empty;
-            if (fileUpload.File != null)
+            List<string> filePath = new List<string>();
+            string uniqueFileName = string.Empty; 
+            if (fileUpload.Files != null)
             {
-                //string uploadFolder = Path.Combine(_environment.WebRootPath, "Content/Laptop/");
-                string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
-                //var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
-                if (!Directory.Exists(uploadFolder))
-                {
-                    Directory.CreateDirectory(uploadFolder);
+                foreach (var file in fileUpload.Files)
+                { 
+                    //string uploadFolder = Path.Combine(_environment.WebRootPath, "Content/Laptop/");
+                    string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
+                    //var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
+                    if (!Directory.Exists(uploadFolder))
+                    {
+                        Directory.CreateDirectory(uploadFolder);
+                    }
+                    uniqueFileName = Guid.NewGuid().ToString() + "_" +file.FileName;
+                    string FilePath = Path.Combine(uploadFolder, uniqueFileName);
+                    //string deleteFromFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
+                    using (var fileStream = new FileStream(FilePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+                    filePath.Add(FilePath);
                 }
-                uniqueFileName = Guid.NewGuid().ToString() + "_" + fileUpload.File.FileName;
-                string filePath = Path.Combine(uploadFolder, uniqueFileName);
-                //string deleteFromFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await fileUpload.File.CopyToAsync(fileStream);
-                }
-                FilePath = filePath;
-            }
-            return FilePath;
 
+            }
+
+            return filePath.ToList();
 
         }
 
@@ -445,7 +451,7 @@ namespace MRSAPI.Repository
             }
         }
 
-        public async Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload, string FilePath)
+        public async Task<FileUploadModel> CreatePostAsync(FileUploadModel fileUpload, List<string> FilePathList)
         {
             var post = new FileUploadModel
             {
@@ -453,8 +459,15 @@ namespace MRSAPI.Repository
                 AttachmentType = fileUpload.AttachmentType
             };
 
-            string saveQuery = "INSERT INTO DOCTOR_FILES (ID,DOCTOR_ID,FILE_TYPE,FILE_PATH) VALUES(incremet_id.NEXTVAL," + post.DoctorId + ",'" + post.AttachmentType + "','" + FilePath + "')";
-            _dbHelper.CmdExecute(saveQuery);
+            if (FilePathList != null)
+            {
+                foreach (string FilePath in FilePathList)
+                {
+                    string saveQuery = "INSERT INTO DOCTOR_FILES (ID,DOCTOR_ID,FILE_TYPE,FILE_PATH) VALUES(incremet_id.NEXTVAL," + post.DoctorId + ",'" + post.AttachmentType + "','" + FilePath + "')";
+                    _dbHelper.CmdExecute(saveQuery);
+                }
+            }
+
 
             return post;
 
@@ -573,15 +586,16 @@ namespace MRSAPI.Repository
 
         }
 
-        public async Task<DeadDoctorModel> LinkDoctorWithMarket(DeadDoctorModel model)
+        public async Task<DeadDoctorRequestModel> LinkDoctorWithMarket(DeadDoctorRequestModel model)
         {
             try
             {
                 mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
-
-                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,REMARK,CREATED_DATETIME,STATUS,APPROVED_BY )" +
-                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + model.OperationType + "','" + model.Remarkes + "', " +
-                    "(TO_DATE('" + model.CreationDate + "','dd-MM-yyyy')),'" + model.Status + "','" + model.ApprovedBy + "')";
+                string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
+                string OperationType = "Dead Doctor";
+                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,REMARK,CREATED_DATETIME,STATUS )" +
+                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.Remarkes + "', " +
+                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status + "')";
 
 
                 _dbHelper.CmdExecute(qry);
@@ -603,8 +617,8 @@ namespace MRSAPI.Repository
                     foreach (var detailModel in model.doctorSupervisorInfoModels)
                     {
                         long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
-                        string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,APRROVAL_STATUS,CREATED_DATETIME)" +
-                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "','" + detailModel.ApprovalStatus + "',(TO_DATE('" + model.CreationDate + "','dd-MM-yyyy')))";
+                        string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,CREATED_DATETIME)" +
+                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
 
                         _dbHelper.CmdExecute(query1);
                     }
@@ -620,15 +634,17 @@ namespace MRSAPI.Repository
         }
 
 
-        public async Task<DoctorShiftModel> DoctorShiftMarket(DoctorShiftModel model)
+        public async Task<DoctorShiftRequestModel> DoctorShiftMarket(DoctorShiftRequestModel model)
         {
             try
             {
+                string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
+                string OperationType = "Shift Doctor";
                 mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
 
-                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,FROM_MARKET,TO_MARKET,REMARK,CREATED_DATETIME,STATUS,APPROVED_BY )" +
-                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + model.OperationType + "','" + model.FromMarket + "','" + model.ToMarket + "','" + model.Remarkes + "', " +
-                    "(TO_DATE('" + model.CreationDate + "','dd-MM-yyyy')),'" + model.Status + "','" + model.ApprovedBy + "')";
+                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,FROM_MARKET,TO_MARKET,REMARK,CREATED_DATETIME,STATUS )" +
+                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.FromMarket + "','" + model.ToMarket + "','" + model.Remarkes + "', " +
+                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status + "')";
 
 
                 _dbHelper.CmdExecute(qry);
@@ -650,8 +666,8 @@ namespace MRSAPI.Repository
                     foreach (var detailModel in model.doctorSupervisorInfoModels)
                     {
                         long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
-                        string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,APRROVAL_STATUS,CREATED_DATETIME)" +
-                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "','" + detailModel.ApprovalStatus + "',(TO_DATE('" + model.CreationDate + "','dd-MM-yyyy')))";
+                        string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,CREATED_DATETIME)" +
+                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
 
                         _dbHelper.CmdExecute(query1);
                     }
@@ -664,6 +680,76 @@ namespace MRSAPI.Repository
                 throw;
             }
             return model;
+        }
+        public async Task<bool> DoctorLinkWithMarket(DoctorLinkRequestModel model)
+        {
+            bool isTrue = false;
+            try
+            {
+                
+                string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
+                string OperationType = "Shift Doctor";
+                mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
+
+                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,REMARK,CREATED_DATETIME,STATUS )" +
+                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.Remarkes + "', " +
+                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status + "')";
+
+                if (_dbHelper.CmdExecute(qry)>0)
+                {
+                    isTrue = true;
+                }
+                else
+                {
+                    isTrue = false;
+                }
+
+                if (model.deadDoctorInfoModels != null)
+                {
+
+                    foreach (var detailModel in model.deadDoctorInfoModels)
+                    {
+                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_DOCTORS");
+                        string query1 = "Insert Into OPERATION_DOCTORS(ID,OPERATION_MASTER_ID,DOCTOR_ID) Values(" + Sl + "," + mxSl + ",'" + detailModel.DoctorId + "')";
+
+                        if (_dbHelper.CmdExecute(query1) > 0)
+                        {
+                            isTrue = true;
+                        }
+                        else
+                        {
+                            isTrue = false;
+                        }
+                    }
+                }
+                if (model.doctorSupervisorInfoModels != null)
+                {
+
+                    foreach (var detailModel in model.doctorSupervisorInfoModels)
+                    {
+                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
+                        string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,CREATED_DATETIME)" +
+                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
+
+                        if ( _dbHelper.CmdExecute(query1) > 0)
+                        {
+                            isTrue = true;
+                        }
+                        else
+                        {
+                            isTrue = false;
+                        }
+                        
+                    }
+                }
+                //model.Id = mxSl;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return isTrue;
         }
 
 
@@ -696,9 +782,9 @@ namespace MRSAPI.Repository
 
 
 
-        public DoctorShiftModel GetMarketById(int id)
+        public DoctorShiftRequestModel GetMarketById(int id)
         {
-            DoctorShiftModel model = new DoctorShiftModel();
+            DoctorShiftRequestModel model = new DoctorShiftRequestModel();
             using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
             {
                 string query = "Select * from OPERATIONS_MASTER Where ID = " + id + "";
@@ -713,12 +799,12 @@ namespace MRSAPI.Repository
                         model.Id = Convert.ToInt32(reader["ID"]);
                         model.EmployeeId = reader["EMPLOYEE_ID"].ToString();
                         model.MarketCode = reader["MARKET_CODE"].ToString();
-                        model.OperationType = reader["OPERATION_TYPE"].ToString();
+                        //model.OperationType = reader["OPERATION_TYPE"].ToString();
                         model.FromMarket = reader["FROM_MARKET"].ToString();
                         model.ToMarket = reader["TO_MARKET"].ToString();
                         model.Status = reader["STATUS"].ToString();
                         model.Remarkes = reader["REMARK"].ToString();
-                        model.ApprovedBy = reader["APPROVED_BY"].ToString();
+                        //model.ApprovedBy = reader["APPROVED_BY"].ToString();
                         model.deadDoctorInfoModels = GetDoctorListById(id);
                         model.doctorSupervisorInfoModels = GetSupervisorInfoById(id);
                     }
@@ -748,7 +834,7 @@ namespace MRSAPI.Repository
                         model.MarketCode = reader["MARKET_CODE"].ToString();
                         model.IsSupervisor = reader["IS_SUPERVISOR"].ToString();
                         model.Remarkes = reader["REMARKS"].ToString();
-                        model.ApprovalStatus = reader["APRROVAL_STATUS"].ToString();
+                        //model.ApprovalStatus = reader["APRROVAL_STATUS"].ToString();
                         //model.UpazilaName = reader["UPAZILA_NAME"].ToString();
                         listData.Add(model);
                     }
@@ -800,25 +886,25 @@ namespace MRSAPI.Repository
 
         }
 
-        public int GetFileAttachmentId(int doctorId, string attachmentType, string filePath)
+        public int GetFileAttachmentId(int doctorId, string attachmentType)
         {
             using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
             {
                 string query = "Select * from DOCTOR_FILES Where 1 = 1";
 
-                if (attachmentType != null && filePath == null)
+                if (attachmentType != null)
                 {
                     query += " AND DOCTOR_ID = " + doctorId + " And FILE_TYPE = '" + attachmentType + "'";
                 }
-                else if (attachmentType == null && filePath != null)
+                else if (attachmentType == null)
                 {
-                    query += " AND DOCTOR_ID = " + doctorId + " And FILE_PATH = '" + filePath + "'";
+                    query += " AND DOCTOR_ID = " + doctorId + "";
                 }
-                else if (attachmentType != null && filePath != null)
+                else if (attachmentType != null)
                 {
-                    query += " AND DOCTOR_ID = " + doctorId + " And FILE_PATH = '" + filePath + "' And FILE_TYPE = '" + attachmentType + "'";
+                    query += " AND DOCTOR_ID = " + doctorId + " And FILE_TYPE = '" + attachmentType + "'";
                 }
-                else if (attachmentType == null && filePath == null)
+                else if (attachmentType == null)
                 {
                     query += " AND DOCTOR_ID = " + doctorId + "";
                 }
@@ -841,7 +927,7 @@ namespace MRSAPI.Repository
         //    throw new NotImplementedException();
         //}
 
-        public bool DeleteMarketWithDocotor(DoctorShiftModel obj)
+        public bool DeleteMarketWithDocotor(DoctorShiftRequestModel obj)
         {
             if (obj.doctorSupervisorInfoModels != null)
             {
