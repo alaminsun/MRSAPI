@@ -714,7 +714,7 @@ namespace MRSAPI.Repository
             {
 
                 string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
-                string OperationType = "Shift Doctor";
+                string OperationType = "Link Doctor";
                 mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
 
                 string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,REMARK,CREATED_DATETIME,STATUS )" +
