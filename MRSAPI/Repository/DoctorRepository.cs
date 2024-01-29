@@ -404,11 +404,11 @@ namespace MRSAPI.Repository
         public async Task<List<string>> SavePostImageAsync(FileUploadModel fileUpload)
         {
             List<string> filePath = new List<string>();
-            string uniqueFileName = string.Empty; 
+            string uniqueFileName = string.Empty;
             if (fileUpload.Files != null)
             {
                 foreach (var file in fileUpload.Files)
-                { 
+                {
                     //string uploadFolder = Path.Combine(_environment.WebRootPath, "Content/Laptop/");
                     string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
                     //var filepath = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
@@ -416,7 +416,7 @@ namespace MRSAPI.Repository
                     {
                         Directory.CreateDirectory(uploadFolder);
                     }
-                    uniqueFileName = Guid.NewGuid().ToString() + "_" +file.FileName;
+                    uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
                     string FilePath = Path.Combine(uploadFolder, uniqueFileName);
                     //string deleteFromFolder = Path.Combine(Directory.GetCurrentDirectory(), "Upload\\Files");
                     using (var fileStream = new FileStream(FilePath, FileMode.Create))
@@ -586,8 +586,9 @@ namespace MRSAPI.Repository
 
         }
 
-        public async Task<DeadDoctorRequestModel> LinkDoctorWithMarket(DeadDoctorRequestModel model)
+        public async Task<bool> LinkDoctorWithMarket(DeadDoctorRequestModel model)
         {
+            bool isTrue = false;
             try
             {
                 mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
@@ -595,114 +596,15 @@ namespace MRSAPI.Repository
                 string OperationType = "Dead Doctor";
                 string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,REMARK,CREATED_DATETIME,STATUS )" +
                     "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.Remarkes + "', " +
-                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status + "')";
+                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status.ToUpper() + "')";
 
 
-                _dbHelper.CmdExecute(qry);
-
-                if (model.deadDoctorInfoModels != null)
-                {
-
-                    foreach (var detailModel in model.deadDoctorInfoModels)
-                    {
-                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_DOCTORS");
-                        string query1 = "Insert Into OPERATION_DOCTORS(ID,OPERATION_MASTER_ID,DOCTOR_ID) Values(" + Sl + "," + mxSl + ",'" + detailModel.DoctorId + "')";
-
-                        _dbHelper.CmdExecute(query1);
-                    }
-                }
-                if (model.doctorSupervisorInfoModels != null)
-                {
-
-                    foreach (var detailModel in model.doctorSupervisorInfoModels)
-                    {
-                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
-                        string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,CREATED_DATETIME)" +
-                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
-
-                        _dbHelper.CmdExecute(query1);
-                    }
-                }
-                model.Id = mxSl;
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            return model;
-        }
-
-
-        public async Task<DoctorShiftRequestModel> DoctorShiftMarket(DoctorShiftRequestModel model)
-        {
-            try
-            {
-                string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
-                string OperationType = "Shift Doctor";
-                mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
-
-                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,FROM_MARKET,TO_MARKET,REMARK,CREATED_DATETIME,STATUS )" +
-                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.FromMarket + "','" + model.ToMarket + "','" + model.Remarkes + "', " +
-                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status + "')";
-
-
-                _dbHelper.CmdExecute(qry);
-
-                if (model.deadDoctorInfoModels != null)
-                {
-
-                    foreach (var detailModel in model.deadDoctorInfoModels)
-                    {
-                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_DOCTORS");
-                        string query1 = "Insert Into OPERATION_DOCTORS(ID,OPERATION_MASTER_ID,DOCTOR_ID) Values(" + Sl + "," + mxSl + ",'" + detailModel.DoctorId + "')";
-
-                        _dbHelper.CmdExecute(query1);
-                    }
-                }
-                if (model.doctorSupervisorInfoModels != null)
-                {
-
-                    foreach (var detailModel in model.doctorSupervisorInfoModels)
-                    {
-                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
-                        string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,CREATED_DATETIME)" +
-                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
-
-                        _dbHelper.CmdExecute(query1);
-                    }
-                }
-                model.Id = mxSl;
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            return model;
-        }
-        public async Task<bool> DoctorLinkWithMarket(DoctorLinkRequestModel model)
-        {
-            bool isTrue = false;
-            try
-            {
-                
-                string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
-                string OperationType = "Shift Doctor";
-                mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
-
-                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,REMARK,CREATED_DATETIME,STATUS )" +
-                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.Remarkes + "', " +
-                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status + "')";
-
-                if (_dbHelper.CmdExecute(qry)>0)
+                if (_dbHelper.CmdExecute(qry) > 0)
                 {
                     isTrue = true;
+                    model.Id = mxSl;
                 }
-                else
-                {
-                    isTrue = false;
-                }
+
 
                 if (model.deadDoctorInfoModels != null)
                 {
@@ -716,10 +618,7 @@ namespace MRSAPI.Repository
                         {
                             isTrue = true;
                         }
-                        else
-                        {
-                            isTrue = false;
-                        }
+
                     }
                 }
                 if (model.doctorSupervisorInfoModels != null)
@@ -728,18 +627,134 @@ namespace MRSAPI.Repository
                     foreach (var detailModel in model.doctorSupervisorInfoModels)
                     {
                         long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
-                        string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,CREATED_DATETIME)" +
+                        string query2 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,CREATED_DATETIME)" +
                             " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
 
-                        if ( _dbHelper.CmdExecute(query1) > 0)
+                        if (_dbHelper.CmdExecute(query2) > 0)
                         {
                             isTrue = true;
                         }
-                        else
+
+                    }
+                }
+                //model.Id = mxSl;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return isTrue;
+        }
+
+
+        public async Task<bool> DoctorShiftMarket(DoctorShiftRequestModel model)
+        {
+            bool isTrue = false;
+            try
+            {
+               
+                string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
+                string OperationType = "Shift Doctor";
+                mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
+
+                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,FROM_MARKET,TO_MARKET,REMARK,CREATED_DATETIME,STATUS )" +
+                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.FromMarket + "','" + model.ToMarket + "','" + model.Remarkes + "', " +
+                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status.ToUpper() + "')";
+
+
+                if (_dbHelper.CmdExecute(qry) > 0)
+                {
+                    isTrue = true;
+                    model.Id = mxSl;
+                }
+
+                if (model.doctorInfoModels != null)
+                {
+
+                    foreach (var detailModel in model.doctorInfoModels)
+                    {
+                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_DOCTORS");
+                        string query1 = "Insert Into OPERATION_DOCTORS(ID,OPERATION_MASTER_ID,DOCTOR_ID) Values(" + Sl + "," + mxSl + ",'" + detailModel.DoctorId + "')";
+
+                        if (_dbHelper.CmdExecute(query1) > 0)
                         {
-                            isTrue = false;
+                            isTrue = true;
                         }
-                        
+                    }
+                }
+                if (model.supervisorInfoModels != null)
+                {
+
+                    foreach (var detailModel in model.supervisorInfoModels)
+                    {
+                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
+                        string query2 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,CREATED_DATETIME)" +
+                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
+
+                        if (_dbHelper.CmdExecute(query2) > 0)
+                        {
+                            isTrue = true;
+                        }
+                    }
+                }
+                //model.Id = mxSl;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return isTrue;
+        }
+        public async Task<bool> DoctorLinkWithMarket(DoctorLinkRequestModel model)
+        {
+            bool isTrue = false;
+            try
+            {
+
+                string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
+                string OperationType = "Shift Doctor";
+                mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
+
+                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,REMARK,CREATED_DATETIME,STATUS )" +
+                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.Remarkes + "', " +
+                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status.ToUpper() + "')";
+
+                if (_dbHelper.CmdExecute(qry) > 0)
+                {
+                    isTrue = true;
+                    model.Id = mxSl;
+                }
+
+                if (model.doctorInfoModels != null)
+                {
+
+                    foreach (var detailModel in model.doctorInfoModels)
+                    {
+                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_DOCTORS");
+                        string query1 = "Insert Into OPERATION_DOCTORS(ID,OPERATION_MASTER_ID,DOCTOR_ID) Values(" + Sl + "," + mxSl + ",'" + detailModel.DoctorId + "')";
+
+                        if (_dbHelper.CmdExecute(query1) > 0)
+                        {
+                            isTrue = true;
+                        }
+                    }
+                }
+                if (model.supervisorInfoModels != null)
+                {
+
+                    foreach (var detailModel in model.supervisorInfoModels)
+                    {
+                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
+                        string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,CREATED_DATETIME)" +
+                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
+
+                        if (_dbHelper.CmdExecute(query1) > 0)
+                        {
+                            isTrue = true;
+                        }
+
                     }
                 }
                 //model.Id = mxSl;
@@ -761,6 +776,42 @@ namespace MRSAPI.Repository
             int rowCount = dt.Rows.Count;
             return rowCount > 0;
 
+        }
+
+        public async Task<bool> UpdateTMInfo(TMRponsesOnRequest obj)
+        {
+            string CurrentDate = DateTime.Now.ToString("dd/MM/yyyy");
+            bool isTrue = false;
+            try
+            {
+                //mxSl = _iDGenerated.getMAXSL("INSTI_CODE", "INSTITUTION Where INSTI_CODE not in (99999)");
+                string updateQuery = "Update OPERATIONS_MASTER Set APPROVED_BY = '" + obj.EmployeeId + "' Where ID = " + obj.Id + "";
+
+                if (_dbHelper.CmdExecute(updateQuery) > 0)
+                {
+                    isTrue = true;
+                    //model.InstituteCode = mxSl.ToString();
+                }
+
+                if (obj.TMResponses != null)
+                {
+                    foreach (var detailModel in obj.TMResponses)
+                    {
+                        string updateQuery1 = "Update OPERATION_SUPERVISORS Set APRROVAL_STATUS = '" + detailModel.ApprovalStatus + "', UPDATED_DATETIME = (TO_DATE('" + CurrentDate + "','dd-MM-yyyy')) Where ID = " + detailModel.Id + " AND OPERATION_MASTER_ID = " + obj.Id + "";
+                        if (_dbHelper.CmdExecute(updateQuery1) > 0)
+                        {
+                            isTrue = true;
+                        }
+
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return isTrue;
         }
 
 
@@ -805,8 +856,8 @@ namespace MRSAPI.Repository
                         model.Status = reader["STATUS"].ToString();
                         model.Remarkes = reader["REMARK"].ToString();
                         //model.ApprovedBy = reader["APPROVED_BY"].ToString();
-                        model.deadDoctorInfoModels = GetDoctorListById(id);
-                        model.doctorSupervisorInfoModels = GetSupervisorInfoById(id);
+                        model.doctorInfoModels = GetDoctorListById(id);
+                        model.supervisorInfoModels = GetSupervisorInfoById(id);
                     }
 
                 }
@@ -815,9 +866,9 @@ namespace MRSAPI.Repository
 
         }
 
-        private List<DoctorSupervisorInfoModel> GetSupervisorInfoById(int id)
+        private List<SupervisorInfoModel> GetSupervisorInfoById(int id)
         {
-            List<DoctorSupervisorInfoModel> listData = new List<DoctorSupervisorInfoModel>();
+            List<SupervisorInfoModel> listData = new List<SupervisorInfoModel>();
             string query = "Select OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,APRROVAL_STATUS,CREATED_DATETIME,UPDATED_DATETIME From OPERATION_SUPERVISORS Where OPERATION_MASTER_ID = " + id + "";
 
             using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
@@ -828,7 +879,7 @@ namespace MRSAPI.Repository
                 {
                     while (reader.Read())
                     {
-                        DoctorSupervisorInfoModel model = new DoctorSupervisorInfoModel();
+                        SupervisorInfoModel model = new SupervisorInfoModel();
                         model.EmployeeId = reader["EMPLOYEE_ID"].ToString();
                         model.TerritoryCode = reader["TERITORY_CODE"].ToString();
                         model.MarketCode = reader["MARKET_CODE"].ToString();
@@ -843,10 +894,10 @@ namespace MRSAPI.Repository
             return listData;
         }
 
-        private List<DeadDoctorInfoModel> GetDoctorListById(int id)
+        private List<DoctorInfoModel> GetDoctorListById(int id)
         {
-            List<DeadDoctorInfoModel> listData = new List<DeadDoctorInfoModel>();
-            string query = "Select OPERATION_MASTER_ID,DOCTOR_ID From OPERATION_DOCTORS Where OPERATION_MASTER_ID = "+id+"";
+            List<DoctorInfoModel> listData = new List<DoctorInfoModel>();
+            string query = "Select OPERATION_MASTER_ID,DOCTOR_ID From OPERATION_DOCTORS Where OPERATION_MASTER_ID = " + id + "";
 
             using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
             {
@@ -856,9 +907,41 @@ namespace MRSAPI.Repository
                 {
                     while (reader.Read())
                     {
-                        DeadDoctorInfoModel model = new DeadDoctorInfoModel();
+                        DoctorInfoModel model = new DoctorInfoModel();
                         model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
                         //model.UpazilaName = reader["UPAZILA_NAME"].ToString();
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
+        }
+
+
+        public List<MPORequestModel> GetMPORequestByTMId(string TmId)
+        {
+            List<MPORequestModel> listData = new List<MPORequestModel>();
+            //string query = "Select EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,FROM_MARKET,TO_MARKET,STATUS,REMARK from OPERATIONS_MASTER Where Status = 'PENDING'";
+            string query = "Select OM.ID,OM.EMPLOYEE_ID,OM.MARKET_CODE,OM.OPERATION_TYPE,OD.DOCTOR_ID, OM.FROM_MARKET,OM.TO_MARKET,OM.STATUS,OM.REMARK from OPERATIONS_MASTER OM\r\nLeft join OPERATION_DOCTORS OD on OM.ID=OD.OPERATION_MASTER_ID \r\nLeft join OPERATION_SUPERVISORS OS on OM.ID = OS.OPERATION_MASTER_ID Where OS.EMPLOYEE_ID = '" + TmId + "' AND OM.Status = 'PENDING'";
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        MPORequestModel model = new MPORequestModel();
+                        model.Id = Convert.ToInt32(reader["ID"]);
+                        model.EmployeeId = reader["EMPLOYEE_ID"].ToString();
+                        model.MarketCode = reader["MARKET_CODE"].ToString();
+                        model.OperationType = reader["OPERATION_TYPE"].ToString();
+                        model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
+                        model.FromMarket = reader["FROM_MARKET"].ToString();
+                        model.ToMarket = reader["TO_MARKET"].ToString();
+                        model.Status = reader["STATUS"].ToString();
+                        model.Remarkes = reader["REMARK"].ToString();
+
                         listData.Add(model);
                     }
                 }
@@ -922,25 +1005,20 @@ namespace MRSAPI.Repository
             }
         }
 
-        //public DoctorShiftModel GetMarketById(int id)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         public bool DeleteMarketWithDocotor(DoctorShiftRequestModel obj)
         {
-            if (obj.doctorSupervisorInfoModels != null)
+            if (obj.supervisorInfoModels != null)
             {
-                foreach (var detailModel in obj.doctorSupervisorInfoModels)
+                foreach (var detailModel in obj.supervisorInfoModels)
                 {
                     string query1 = "Delete from OPERATION_SUPERVISORS Where OPERATION_MASTER_ID = " + obj.Id + "";
 
                     _dbHelper.CmdExecute(query1);
                 }
             }
-            if (obj.deadDoctorInfoModels != null)
+            if (obj.doctorInfoModels != null)
             {
-                foreach (var detailModel in obj.deadDoctorInfoModels)
+                foreach (var detailModel in obj.doctorInfoModels)
                 {
                     string query2 = "Delete from OPERATION_DOCTORS Where OPERATION_MASTER_ID = " + obj.Id + "";
                     _dbHelper.CmdExecute(query2);

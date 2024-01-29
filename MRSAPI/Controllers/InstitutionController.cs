@@ -1,12 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MRSAPI.Repository.IRepository;
-using Microsoft.AspNetCore.Http.Headers;
-using System.Reflection.PortableExecutable;
 using MRSAPI.Models;
 using MRSAPI.Models.DTO;
-using System.Diagnostics;
-using System.Reflection;
 
 namespace MRSAPI.Controllers
 {
@@ -101,7 +96,7 @@ namespace MRSAPI.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception (you may want to log it to a file or another storage)
+                // Log the exception (you may want to log it to a file or another storage)           
                 Console.WriteLine(ex.Message);
 
                 // Return a 500 Internal Server Error response
@@ -110,18 +105,18 @@ namespace MRSAPI.Controllers
 
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetEntity(int id)
-        {
-            //var entity = await _context.YourEntities.FindAsync(id);
-            var entity = _institutionRepo.GetInstitutionById(id);
+        //[HttpGet("{id}")]
+        //public IActionResult GetEntity(int id)
+        //{
+        //    //var entity = await _context.YourEntities.FindAsync(id);
+        //    var entity = _institutionRepo.GetInstitutionById(id);
 
-            if (entity == null)
-            {
-                return NotFound();
-            }
+        //    if (entity == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return Ok(entity);
-        }
+        //    return Ok(entity);
+        //}
     }
 }

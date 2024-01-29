@@ -17,7 +17,7 @@ namespace MRSAPI.Models
         //public string? UpdatedDate { get; set; }
         public string Status { get; set; }
         //public string ApprovedBy { get; set; }
-        public List<DeadDoctorInfoModel> deadDoctorInfoModels { get; set; }
-        public List<DoctorSupervisorInfoModel> doctorSupervisorInfoModels { get; set; }
+        public List<DoctorInfoModel> doctorInfoModels { get; set; }
+        public List<SupervisorInfoModel> supervisorInfoModels { get; set; }
     }
 }

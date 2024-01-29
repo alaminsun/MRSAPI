@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MRSAPI.Models
+namespace MRSAPI.Models.DTO
 {
-    public class DoctorShiftRequestModel
+    public class DoctorShiftRequestDTO
     {
-        public long Id { get; set; }
+        //public long Id { get; set; }
         [Required]
         public string EmployeeId { get; set; }
         [Required]
