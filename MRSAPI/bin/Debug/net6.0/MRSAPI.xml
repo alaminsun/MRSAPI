@@ -4,7 +4,7 @@
         <name>MRSAPI</name>
     </assembly>
     <members>
-        <member name="M:MRSAPI.Controllers.DoctorController.PostDoctorFileAttchment(MRSAPI.Models.FileUploadModel)">
+        <member name="M:MRSAPI.Controllers.DoctorController.PostDoctorFileAttchment(MRSAPI.Models.FileUploadDTO)">
             <summary>
             fileType 1=PDF, 2=EXCEL, 3=DOCX, 4=IMAGE, 5=TEXT 
             </summary>

@@ -53,12 +53,6 @@ namespace MRSAPI.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                //var postResponse = await _institutionRepo.SaveDoctorInfo(model);
-                //// Create the ApiResponse
-                //if (postResponse.DoctorMasterModels.DoctorId == 0)
-                //{
-                //    return BadRequest(new { message = "Error while saving" });
-                //}
                 string Code = String.Empty;
                 var obj = new InstitutionInfoModel
                 {
@@ -82,15 +76,6 @@ namespace MRSAPI.Controllers
                     ModelState.AddModelError("", $"Something went wrong when save the record");
                     return StatusCode(500, ModelState);
                 }
-
-                //var entity = _institutionRepo.GetInstitutionById(obj.);
-                //var response = new ApiResponse<DoctorInformationAPIModel>
-                //{
-                //    Message = "Data saved successfully.",
-                //    //DoctorId = postResponse.DoctorMasterModels.DoctorId,
-                //    //Data = postResponse
-                //};
-                //return Ok(new { InstituteCode = obj.InstituteCode }, obj);
                 return Ok(new { Message = "Data saved successfully.", obj.InstituteCode, obj });
                 //return CreatedAtAction(nameof(GetEntity), new { id = model.InstitutionInfo.InstituteCode }, model);
             }
@@ -104,19 +89,5 @@ namespace MRSAPI.Controllers
             }
 
         }
-
-        //[HttpGet("{id}")]
-        //public IActionResult GetEntity(int id)
-        //{
-        //    //var entity = await _context.YourEntities.FindAsync(id);
-        //    var entity = _institutionRepo.GetInstitutionById(id);
-
-        //    if (entity == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return Ok(entity);
-        //}
     }
 }

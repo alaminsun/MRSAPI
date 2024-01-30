@@ -147,40 +147,78 @@ namespace MRSAPI.Controllers
         //[HttpPost("[action]")]
         //[HttpPost("{DoctorId:int}", Name = "DoctorFileAttchment")]
         [HttpPost("[action]/{DoctorId:int}")]
-        public async Task<IActionResult> PostDoctorFileAttchment([FromForm] FileUploadModel fileUpload)
+        public async Task<IActionResult> PostDoctorFileAttchment([FromForm] FileUploadDTO fileUpload)
         {
-            List<string> FilePathList = null;
-            var data = _doctorRepo.GetDoctorById(fileUpload.DoctorId);
-            if (data == 0)
-            {
-                return NotFound();
-            }
-            if (fileUpload == null || fileUpload.Files == null || fileUpload.Files.Count == 0)
-            {
-                return BadRequest("No files uploaded.");
-            }
-
-            // Process each uploaded file
-            //foreach (var file in fileUpload.Files)
+            //List<string> FilePathList = null;
+            //var data = _doctorRepo.GetDoctorById(fileUpload.DoctorId);
+            //if (data == 0)
             //{
-            //    //// Perform file processing logic here (e.g., save to disk, store in database)
-            //    //// Example: Save to disk
-            //    //var filePath = Path.Combine("YourUploadDirectory", file.FileName);
-            //    //using (var stream = new FileStream(filePath, FileMode.Create))
-            //    //{
-            //    //    file.CopyTo(stream);
-            //    //}
-            //    FilePath = await _doctorRepo.SavePostImageAsync(fileUpload, FilePath);
+            //    return NotFound();
             //}
-            if (fileUpload.Files != null)
+            //if (fileUpload == null || fileUpload.Files == null || fileUpload.Files.Count == 0)
+            //{
+            //    return BadRequest("No files uploaded.");
+            //}
+
+            //if (fileUpload.Files != null)
+            //{
+            //    FilePathList = await _doctorRepo.SavePostImageAsync(fileUpload);
+            //}
+
+            //var postResponse = await _doctorRepo.CreatePostAsync(fileUpload, FilePathList);
+            //int Id = _doctorRepo.GetFileAttachmentId(postResponse.DoctorId, postResponse.AttachmentType);
+
+            //return Ok(new { Message = "Data saved successfully.", Id, FilePathList, postResponse.AttachmentType });
+            try
             {
-                FilePathList = await _doctorRepo.SavePostImageAsync(fileUpload);
+                if (fileUpload == null)
+                {
+                    return BadRequest(ModelState);
+                }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                List<string> FilePathList = null;
+                var data = _doctorRepo.GetDoctorById(fileUpload.DoctorId);
+                if (data == 0)
+                {
+                    return NotFound();
+                }
+                if (fileUpload == null || fileUpload.Files == null || fileUpload.Files.Count == 0)
+                {
+                    return BadRequest("No files uploaded.");
+                }
+                long Code = 0;
+                var obj = new FileUploadModel
+                {
+                    DoctorId = fileUpload.DoctorId,
+                    Id = Code,
+                    Files = fileUpload.Files,
+                    FilePathList = FilePathList,
+                    AttachmentType = fileUpload.AttachmentType,
+                    // Map other properties manually if needed
+                };
+
+                if (fileUpload.Files != null)
+                {
+                    obj.FilePathList = await _doctorRepo.SavePostImageAsync(fileUpload);
+                }
+                if (!await _doctorRepo.CreatePostAsync(obj))
+                {
+                    ModelState.AddModelError("", $"Something went wrong when save the record");
+                    return StatusCode(500, ModelState);
+                }
+                return Ok(new { Message = "Data saved successfully.", obj.Id, obj });
             }
+            catch (Exception ex)
+            {
+                // Log the exception (you may want to log it to a file or another storage)
+                Console.WriteLine(ex.Message);
 
-            var postResponse = await _doctorRepo.CreatePostAsync(fileUpload, FilePathList);
-            int Id = _doctorRepo.GetFileAttachmentId(postResponse.DoctorId, postResponse.AttachmentType);
-
-            return Ok(new { Message = "Data saved successfully.", Id, FilePathList, postResponse.AttachmentType });
+                // Return a 500 Internal Server Error response
+                return StatusCode(500, new { Message = "An error occurred while saving the data." });
+            }
         }
 
 
@@ -232,27 +270,51 @@ namespace MRSAPI.Controllers
         //}
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> PostDoctorInformation([FromBody] DoctorInformationAPIModel model)
+        public async Task<IActionResult> PostDoctorInformation([FromBody] DoctorInformationAPIDTO doctorInformationAPIDTO)
         {
             try
             {
+                if (doctorInformationAPIDTO == null)
+                {
+                    return BadRequest(ModelState);
+                }
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
-                var postResponse = await _doctorRepo.SaveDoctorInfo(model);
-                // Create the ApiResponse
-                if (postResponse.DoctorMasterModels.DoctorId == 0)
+                int doctorId = 0;
+                var obj = new DoctorInformationAPIModel
                 {
-                    return BadRequest(new { message = "Error while saving" });
-                }
-                var response = new ApiResponse<DoctorInformationAPIModel>
-                {
-                    Message = "Data saved successfully.",
-                    DoctorId = postResponse.DoctorMasterModels.DoctorId,
-                    Data = postResponse
+                    EmployeeId = doctorInformationAPIDTO.EmployeeId,
+                    DoctorId = doctorId,
+                    DoctorName = doctorInformationAPIDTO.DoctorMasterModels.DoctorName,
+                    RegistrationNo = doctorInformationAPIDTO.DoctorMasterModels.RegistrationNo,
+                    Gender = doctorInformationAPIDTO.DoctorMasterModels.Gender,
+                    Religion = doctorInformationAPIDTO.DoctorMasterModels.Religion,
+                    DateOfBirth = doctorInformationAPIDTO.DoctorMasterModels.DateOfBirth,
+                    personalContactNumber = doctorInformationAPIDTO.DoctorMasterModels.personalContactNumber,
+                    chamberContactNumber = doctorInformationAPIDTO.DoctorMasterModels.chamberContactNumber,
+                    Email = doctorInformationAPIDTO.DoctorMasterModels.Email,
+                    SpecializationCode = doctorInformationAPIDTO.DoctorMasterModels.SpecializationCode,
+                    PotentialCategory = doctorInformationAPIDTO.DoctorMasterModels.PotentialCategory,
+                    PatientNoPerDay = doctorInformationAPIDTO.DoctorMasterModels.PatientNoPerDay,
+                    ValuePerPrescription = doctorInformationAPIDTO.DoctorMasterModels.ValuePerPrescription,
+                    Address = doctorInformationAPIDTO.DoctorMasterModels.Address,
+                    DesignationCode = doctorInformationAPIDTO.DoctorMasterModels.DesignationCode,
+                    DegreeTitle = doctorInformationAPIDTO.DoctorMasterModels.DegreeTitle,
+                    DegreeCode = doctorInformationAPIDTO.DoctorMasterModels.DegreeCode,
+                    Remarks = doctorInformationAPIDTO.DoctorMasterModels.Remarks,
+                    DoctorMarketDetailsModels = doctorInformationAPIDTO.DoctorMasterModels.DoctorMarketDetailsModels,
+                    DoctorInSBUs = doctorInformationAPIDTO.DoctorMasterModels.DoctorInSBUs
+
+                    // Map other properties manually if needed
                 };
-                return Ok(response);
+                if (!await _doctorRepo.SaveDoctorInfo(obj))
+                {
+                    ModelState.AddModelError("", $"Something went wrong when save the record");
+                    return StatusCode(500, ModelState);
+                }
+                return Ok(new { Message = "Data saved successfully.", obj.DoctorId, obj });
             }
             catch (Exception ex)
             {
@@ -262,7 +324,7 @@ namespace MRSAPI.Controllers
                 // Return a 500 Internal Server Error response
                 return StatusCode(500, new { Message = "An error occurred while saving the data." });
             }
-     
+
         }
 
         [HttpPost("[action]")]
