@@ -196,7 +196,7 @@ namespace MRSAPI.Controllers
                     Id = Code,
                     Files = fileUpload.Files,
                     FilePathList = FilePathList,
-                    AttachmentType = fileUpload.AttachmentType,
+                    AttachmentTypes = fileUpload.AttachmentTypes,
                     // Map other properties manually if needed
                 };
 

@@ -1,10 +1,13 @@
 ﻿using Microsoft.OpenApi.Models;
+using Microsoft.VisualBasic.FileIO;
 using MRSAPI.Data;
 using MRSAPI.Gateway;
 using MRSAPI.Helpers;
 using MRSAPI.Models;
 using MRSAPI.Repository.IRepository;
 using Oracle.ManagedDataAccess.Client;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 
@@ -460,16 +463,19 @@ namespace MRSAPI.Repository
 
                 if (fileUpload.FilePathList != null)
                 {
-                    foreach (string FilePath in fileUpload.FilePathList)
-                    {
-                        mxSl = _iDGenerated.getMAXSL("ID", "DOCTOR_FILES");
-                        string saveQuery = "INSERT INTO DOCTOR_FILES (ID,DOCTOR_ID,FILE_TYPE,FILE_PATH,CREATION_DATE) VALUES(" + mxSl + "," + fileUpload.DoctorId + ",'" + fileUpload.AttachmentType + "','" + FilePath + "',(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')))";
-
-                        if (_dbHelper.CmdExecute(saveQuery) > 0)
+                    //foreach (string FilePath in fileUpload.FilePathList)
+                        foreach (var (FilePath, AttachmentType) in fileUpload.FilePathList.Zip(fileUpload.AttachmentTypes, (FilePath, AttachmentType) => (FilePath, AttachmentType)))
                         {
-                            isTrue = true;
-                            fileUpload.Id = mxSl;
-                        }
+                            mxSl = _iDGenerated.getMAXSL("ID", "DOCTOR_FILES");
+                            string saveQuery = "INSERT INTO DOCTOR_FILES (ID,DOCTOR_ID,FILE_TYPE,FILE_PATH,CREATION_DATE) VALUES(" + mxSl + "," + fileUpload.DoctorId + ",'" + AttachmentType + "','" + FilePath + "',(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')))";
+                            
+                            if (_dbHelper.CmdExecute(saveQuery) > 0)
+                            {
+                                fileUpload.Id = mxSl;
+                                //InsertFilType(fileUpload);
+                                isTrue = true;
+                                
+                            }
                     }
                 }
             }
@@ -481,6 +487,27 @@ namespace MRSAPI.Repository
 
             return isTrue;
 
+        }
+
+        private bool InsertFilType(FileUploadModel fileUpload)
+        {
+            bool isTrue = false;
+            foreach (var item in fileUpload.AttachmentTypes)
+            {
+                string updateQuery = "Update DOCTOR_FILES Set FILE_TYPE = '"+ item + "' Where Id = "+fileUpload.Id+"";
+                //string updateQuery = " INSERT INTO DOCTOR_FILES(FILE_TYPE) SELECT FILE_TYPE FROM DOCTOR_FILES WHERE Id = "+fileUpload.Id+" ";
+
+                if (_dbHelper.CmdExecute(updateQuery) > 0)
+                {
+                    isTrue = true;
+                }
+            }
+            return isTrue;
+        }
+
+        private long GetUploadIdByPath(List<string> filePathList)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<bool> SaveDoctorInfo(DoctorInformationAPIModel model)
