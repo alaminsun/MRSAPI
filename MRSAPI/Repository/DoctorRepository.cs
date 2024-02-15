@@ -464,18 +464,18 @@ namespace MRSAPI.Repository
                 if (fileUpload.FilePathList != null)
                 {
                     //foreach (string FilePath in fileUpload.FilePathList)
-                        foreach (var (FilePath, AttachmentType) in fileUpload.FilePathList.Zip(fileUpload.AttachmentTypes, (FilePath, AttachmentType) => (FilePath, AttachmentType)))
+                    foreach (var (FilePath, AttachmentType) in fileUpload.FilePathList.Zip(fileUpload.AttachmentTypes, (FilePath, AttachmentType) => (FilePath, AttachmentType)))
+                    {
+                        mxSl = _iDGenerated.getMAXSL("ID", "DOCTOR_FILES");
+                        string saveQuery = "INSERT INTO DOCTOR_FILES (ID,DOCTOR_ID,FILE_TYPE,FILE_PATH,CREATION_DATE) VALUES(" + mxSl + "," + fileUpload.DoctorId + ",'" + AttachmentType + "','" + FilePath + "',(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')))";
+
+                        if (_dbHelper.CmdExecute(saveQuery) > 0)
                         {
-                            mxSl = _iDGenerated.getMAXSL("ID", "DOCTOR_FILES");
-                            string saveQuery = "INSERT INTO DOCTOR_FILES (ID,DOCTOR_ID,FILE_TYPE,FILE_PATH,CREATION_DATE) VALUES(" + mxSl + "," + fileUpload.DoctorId + ",'" + AttachmentType + "','" + FilePath + "',(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')))";
-                            
-                            if (_dbHelper.CmdExecute(saveQuery) > 0)
-                            {
-                                fileUpload.Id = mxSl;
-                                //InsertFilType(fileUpload);
-                                isTrue = true;
-                                
-                            }
+                            fileUpload.Id = mxSl;
+                            //InsertFilType(fileUpload);
+                            isTrue = true;
+
+                        }
                     }
                 }
             }
@@ -494,7 +494,7 @@ namespace MRSAPI.Repository
             bool isTrue = false;
             foreach (var item in fileUpload.AttachmentTypes)
             {
-                string updateQuery = "Update DOCTOR_FILES Set FILE_TYPE = '"+ item + "' Where Id = "+fileUpload.Id+"";
+                string updateQuery = "Update DOCTOR_FILES Set FILE_TYPE = '" + item + "' Where Id = " + fileUpload.Id + "";
                 //string updateQuery = " INSERT INTO DOCTOR_FILES(FILE_TYPE) SELECT FILE_TYPE FROM DOCTOR_FILES WHERE Id = "+fileUpload.Id+" ";
 
                 if (_dbHelper.CmdExecute(updateQuery) > 0)
@@ -538,7 +538,7 @@ namespace MRSAPI.Repository
                 {
                     long DoctorMstSl = _iDGenerated.getMAXSL("DOC_MKT_MAS_SLNO", "DOC_MKT_MAS");
                     string query = "Insert into DOC_MKT_MAS(DOC_MKT_MAS_SLNO,DOCTOR_ID)values(" + DoctorMstSl + "," + mxSl + ")";
-                   
+
                     if (_dbHelper.CmdExecute(query) > 0)
                     {
                         isTrue = true;
@@ -657,7 +657,7 @@ namespace MRSAPI.Repository
             bool isTrue = false;
             try
             {
-               
+
                 string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
                 string OperationType = "Shift Doctor";
                 mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");

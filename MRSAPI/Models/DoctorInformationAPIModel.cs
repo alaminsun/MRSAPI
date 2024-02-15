@@ -70,7 +70,7 @@ namespace MRSAPI.Models
         //public long DoctorMstSl { get; set; }
         public string MarketCode { get; set; }
         //public string MarketName { get; set; }
-        public int? InstituteCode { get; set; }
+        public string? InstituteCode { get; set; }
         public string? InstituteName { get; set; }
         public string? UpazilaCode { get; set; }
         public string? DistrictCode { get; set; }
