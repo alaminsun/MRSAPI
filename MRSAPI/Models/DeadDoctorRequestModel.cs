@@ -11,6 +11,7 @@ namespace MRSAPI.Models
         [Required]
         public string MarketCode { get; set; }
         //public string OperationType { get; set; }
+        [Required]
         public string Remarkes { get; set; }
         //public string CreationDate { get; set; }
         //public string? UpdatedDate { get; set; }
@@ -23,6 +24,7 @@ namespace MRSAPI.Models
 
     public class DoctorInfoModel
     {
+        [Required]
         //public int DoctorMasterId { get; set; }
         public int DoctorId { get; set; }
 
@@ -31,11 +33,13 @@ namespace MRSAPI.Models
     {
         //public int DoctorMasterId { get; set; }
         [Required]
-        public string EmployeeId { get; set; }
+        //public string EmployeeId { get; set; }
         public string TerritoryCode { get; set; }
+        [Required]
         public string MarketCode { get; set; }
+        [Required]
         public string IsSupervisor { get; set; }
-        public string Remarkes { get; set; }
+        //public string Remarkes { get; set; }
         //public string ApprovalStatus { get; set; }
         //public string CreatedDate { get; set; }
 
