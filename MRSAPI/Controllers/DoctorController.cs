@@ -508,10 +508,10 @@ namespace MRSAPI.Controllers
         //}
 
         //[HttpGet("[action]")]
-        [HttpGet("[action]/{TmId}")]
-        public IActionResult GetMPORequest(string TmId)
+        [HttpGet("[action]/{territoryCode}")]
+        public IActionResult GetMPORequest(string territoryCode)
         {
-            var data = _doctorRepo.GetMPORequestByTMId(TmId);
+            var data = _doctorRepo.GetMPORequestByTMId(territoryCode);
             if (data.Count() == 0)
             {
                 return NotFound();

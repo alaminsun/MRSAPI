@@ -33,7 +33,7 @@ namespace MRSAPI.Repository.IRepository
         DoctorShiftRequestModel GetMarketById(int id);
         //bool DeleteMarketWithDocotor(DoctorShiftRequestModel obj);
         Task<bool> DeadDoctorWithMarket(DeadDoctorRequestModel model);
-        List<MPORequestModel> GetMPORequestByTMId(string TmId);
+        List<MPORequestModel> GetMPORequestByTMId(string territoryCode);
         //Task<bool> TMResponse(TMRponsesOnRequest model);
         Task<bool> UpdateTMInfo(TMRponsesOnRequest obj);
         List<TerritoryModel> GetTerritoryByMarket(string marketCode);

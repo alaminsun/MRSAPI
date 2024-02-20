@@ -947,11 +947,15 @@ namespace MRSAPI.Repository
         }
 
 
-        public List<MPORequestModel> GetMPORequestByTMId(string TmId)
+        public List<MPORequestModel> GetMPORequestByTMId(string territoryCode)
         {
             List<MPORequestModel> listData = new List<MPORequestModel>();
             //string query = "Select EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,FROM_MARKET,TO_MARKET,STATUS,REMARK from OPERATIONS_MASTER Where Status = 'PENDING'";
-            string query = "Select OM.ID,OM.EMPLOYEE_ID,OM.MARKET_CODE,OM.OPERATION_TYPE,OD.DOCTOR_ID, OM.FROM_MARKET,OM.TO_MARKET,OM.STATUS,OM.REMARK from OPERATIONS_MASTER OM\r\nLeft join OPERATION_DOCTORS OD on OM.ID=OD.OPERATION_MASTER_ID \r\nLeft join OPERATION_SUPERVISORS OS on OM.ID = OS.OPERATION_MASTER_ID Where OS.EMPLOYEE_ID = '" + TmId + "' AND OM.Status = 'PENDING'";
+            string query = "Select OM.ID,OM.EMPLOYEE_ID,OM.MARKET_CODE,M.MARKET_NAME,OM.OPERATION_TYPE,OD.DOCTOR_ID, OM.FROM_MARKET,OM.TO_MARKET,OM.STATUS,OM.REMARK from OPERATIONS_MASTER OM\r\n" +
+                " Left join OPERATION_DOCTORS OD on OM.ID=OD.OPERATION_MASTER_ID " +
+                " Left join OPERATION_SUPERVISORS OS on OM.ID = OS.OPERATION_MASTER_ID " +
+                " Left join Market M on OM.MARKET_CODE = M.MARKET_CODE" +
+                " Where OS.TERITORY_CODE = '" + territoryCode + "' AND OM.Status = 'PENDING'";
             using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
             {
                 OracleCommand cmd = new OracleCommand(query, con);
@@ -962,15 +966,47 @@ namespace MRSAPI.Repository
                     {
                         MPORequestModel model = new MPORequestModel();
                         model.Id = Convert.ToInt32(reader["ID"]);
-                        model.EmployeeId = reader["EMPLOYEE_ID"].ToString();
+                        //model.EmployeeId = reader["EMPLOYEE_ID"].ToString();
                         model.MarketCode = reader["MARKET_CODE"].ToString();
+                        model.MarketName = reader["MARKET_NAME"].ToString();
                         model.OperationType = reader["OPERATION_TYPE"].ToString();
                         model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
                         model.FromMarket = reader["FROM_MARKET"].ToString();
                         model.ToMarket = reader["TO_MARKET"].ToString();
                         model.Status = reader["STATUS"].ToString();
                         model.Remarkes = reader["REMARK"].ToString();
+                        model.DoctorList = GetDoctorListById(model.Id);
+                        model.TMList = GetTmInfoById(model.Id);
 
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
+        }
+
+        private List<LinkTMModel> GetTmInfoById(int id)
+        {
+            List<LinkTMModel> listData = new List<LinkTMModel>();
+            string query = " Select a.OPERATION_MASTER_ID,a.TERITORY_CODE,a.MARKET_CODE, m.MARKET_NAME ,a.IS_SUPERVISOR,a.REMARKS,a.APRROVAL_STATUS "+
+                           " From OPERATION_SUPERVISORS a left join Market m on A.MARKET_CODE = M.MARKET_CODE Where A.OPERATION_MASTER_ID = "+ id + "";
+
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        LinkTMModel model = new LinkTMModel();
+                        model.TerritoryCode = reader["TERITORY_CODE"].ToString();
+                        model.MarketCode = reader["MARKET_CODE"].ToString();
+                        model.MarketName = reader["MARKET_NAME"].ToString();
+                        model.IsSupervisor = reader["IS_SUPERVISOR"].ToString();
+                        model.Remarks = reader["REMARKS"].ToString();
+                        model.ApprovalStatus = reader["APRROVAL_STATUS"].ToString();
+                        //model.UpazilaName = reader["UPAZILA_NAME"].ToString();
                         listData.Add(model);
                     }
                 }
