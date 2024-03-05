@@ -370,50 +370,95 @@ namespace MRSAPI.Controllers
             }
         }
 
-        //[HttpPost("[action]")]
-        //public async Task<IActionResult> DoctorShiftRequest([FromBody] DoctorShiftRequestDTO doctorShiftRequestDTO)
-        //{
-        //    try
-        //    {
-        //        if (doctorShiftRequestDTO == null)
-        //        {
-        //            return BadRequest(ModelState);
-        //        }
-        //        if (!ModelState.IsValid)
-        //        {
-        //            return BadRequest(ModelState);
-        //        }
-        //        int Code = 0;
-        //        var obj = new DoctorShiftRequestModel
-        //        {
-        //            EmployeeId = doctorShiftRequestDTO.EmployeeId,
-        //            Id = Code,
-        //            MarketCode = doctorShiftRequestDTO.MarketCode,
-        //            FromMarket = doctorShiftRequestDTO.FromMarket,
-        //            ToMarket = doctorShiftRequestDTO.ToMarket,
-        //            Remarkes = doctorShiftRequestDTO.Remarkes,
-        //            Status = doctorShiftRequestDTO.Status,
-        //            doctorInfoModels = doctorShiftRequestDTO.doctorInfoModels,
-        //            supervisorInfoModels = doctorShiftRequestDTO.supervisorInfoModels
+        [HttpPost("[action]")]
+        public async Task<IActionResult> DoctorShiftRequest([FromBody] DoctorShiftRequestDTO doctorShiftRequestDTO)
+        {
+            try
+            {
+                if (doctorShiftRequestDTO == null)
+                {
+                    return BadRequest(ModelState);
+                }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                int Code = 0;
+                var obj = new DoctorShiftRequestModel
+                {
+                    EmployeeId = doctorShiftRequestDTO.EmployeeId,
+                    Id = Code,
+                    MarketCode = doctorShiftRequestDTO.MarketCode,
+                    FromMarket = doctorShiftRequestDTO.FromMarket,
+                    ToMarket = doctorShiftRequestDTO.ToMarket,
+                    Remarkes = doctorShiftRequestDTO.Remarkes,
+                    Status = doctorShiftRequestDTO.Status,
+                    doctorInfoModels = doctorShiftRequestDTO.doctorInfoModels,
+                    supervisorInfoModels = doctorShiftRequestDTO.supervisorInfoModels
 
-        //            // Map other properties manually if needed
-        //        };
-        //        if (!await _doctorRepo.DoctorShiftMarket(obj))
-        //        {
-        //            ModelState.AddModelError("", $"Something went wrong when save the record");
-        //            return StatusCode(500, ModelState);
-        //        }
-        //        return Ok(new { Message = "Data saved successfully.", obj.Id, obj });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log the exception (you may want to log it to a file or another storage)
-        //        Console.WriteLine(ex.Message);
+                    // Map other properties manually if needed
+                };
+                if (!await _doctorRepo.DoctorShiftMarket(obj))
+                {
+                    ModelState.AddModelError("", $"Something went wrong when save the record");
+                    return StatusCode(500, ModelState);
+                }
+                return Ok(new { Message = "Data saved successfully.", obj.Id, obj });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you may want to log it to a file or another storage)
+                Console.WriteLine(ex.Message);
 
-        //        // Return a 500 Internal Server Error response
-        //        return StatusCode(500, new { Message = "An error occurred while saving the data." });
-        //    }
-        //}
+                // Return a 500 Internal Server Error response
+                return StatusCode(500, new { Message = "An error occurred while saving the data." });
+            }
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> DoctorDeleteRequest([FromBody] DoctorDeleteRequestDTO doctorShiftRequestDTO)
+        {
+            try
+            {
+                if (doctorShiftRequestDTO == null)
+                {
+                    return BadRequest(ModelState);
+                }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                int Code = 0;
+                var obj = new DoctorDeleteRequestModel
+                {
+                    EmployeeId = doctorShiftRequestDTO.EmployeeId,
+                    Id = Code,
+                    MarketCode = doctorShiftRequestDTO.MarketCode,
+                    //FromMarket = doctorShiftRequestDTO.FromMarket,
+                    //ToMarket = doctorShiftRequestDTO.ToMarket,
+                    Remarkes = doctorShiftRequestDTO.Remarkes,
+                    Status = doctorShiftRequestDTO.Status,
+                    doctorInfoModels = doctorShiftRequestDTO.doctorInfoModels,
+                    supervisorInfoModels = doctorShiftRequestDTO.supervisorInfoModels
+
+                    // Map other properties manually if needed
+                };
+                if (!await _doctorRepo.DoctorDeleteMarket(obj))
+                {
+                    ModelState.AddModelError("", $"Something went wrong when save the record");
+                    return StatusCode(500, ModelState);
+                }
+                return Ok(new { Message = "Data saved successfully.", obj.Id, obj });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you may want to log it to a file or another storage)
+                Console.WriteLine(ex.Message);
+
+                // Return a 500 Internal Server Error response
+                return StatusCode(500, new { Message = "An error occurred while saving the data." });
+            }
+        }
 
         //[HttpPost("[action]")]
         //public async Task<IActionResult> DoctorLinkRequest([FromBody] DoctorLinkRequestDTO doctorLinkRequestDTO)
@@ -511,13 +556,33 @@ namespace MRSAPI.Controllers
         [HttpGet("[action]/{territoryCode}")]
         public IActionResult GetMPORequest(string territoryCode)
         {
-            var data = _doctorRepo.GetMPORequestByTMId(territoryCode);
-            if (data.Count() == 0)
-            {
-                return NotFound();
-            }
+            var data = _doctorRepo.GetMPODeadRequestByTMId(territoryCode);
+            //if (data.Count() == 0)
+            //{
+            //    return NotFound();
+            //}
             return Ok(data);
         }
+        //[HttpGet("[action]/{territoryCode}")]
+        //public IActionResult GetMPOShiftRequest(string territoryCode)
+        //{
+        //    var data = _doctorRepo.GetMPOShiftRequestByTMId(territoryCode);
+        //    if (data.Count() == 0)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return Ok(data);
+        //}
+        //[HttpGet("[action]/{territoryCode}")]
+        //public IActionResult GetMPODeletetRequest(string territoryCode)
+        //{
+        //    var data = _doctorRepo.GetMPODeleteRequestByTMId(territoryCode);
+        //    if (data.Count() == 0)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return Ok(data);
+        //}
 
         [HttpGet("[action]/{marketCode}")]
         public IActionResult TerritoryByMarket(string marketCode)
@@ -548,8 +613,8 @@ namespace MRSAPI.Controllers
                 string Code = String.Empty;
                 var obj = new TMRponsesOnRequest
                 {
-                    EmployeeId = tMRponsesOnRequest.EmployeeId,
-                    Id = tMRponsesOnRequest.Id,
+                    TerritoryCode = tMRponsesOnRequest.TerritoryCode,
+                    MstId = tMRponsesOnRequest.MstId,
                     TMResponses = tMRponsesOnRequest.TMResponsesDTOs
 
 

@@ -6,10 +6,11 @@ namespace MRSAPI.Models
     public class TMRponsesOnRequest
     {
         [Required]
-        public long Id { get; set; }
+        public long MstId { get; set; }
         [Required]
-        public string EmployeeId { get; set; }
+        //public string EmployeeId { get; set; }
         //public string Status { get; set; }
+        public string TerritoryCode { get; set; }
         public List<TMResponses> TMResponses { get; set; }
     }
 
@@ -18,7 +19,7 @@ namespace MRSAPI.Models
         public long Id { get; set; }
         public string ApprovalStatus { get; set; }
         //public string UpdatedDate { get; set; }
-        //public string Remarks { get; set; }
+        public string Remarks { get; set; }
 
     }
 }
