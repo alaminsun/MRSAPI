@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using MRSAPI.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using MRSAPI.Repository.IRepository;
 
 namespace MRSAPI.Controllers
@@ -9,30 +7,21 @@ namespace MRSAPI.Controllers
     [ApiController]
     public class MenuController : ControllerBase
     {
-        //private readonly IMenuRepository _menuRepo;
-        //public MenuController(IMenuRepository menuRepo)
-        //{
-        //    _menuRepo = menuRepo;
-        //}
-
-        private readonly List<Menu> _staticData;
-
-        public MenuController()
+        private readonly IMenuRepository _menuRepo;
+        public MenuController(IMenuRepository menuRepo)
         {
-            // Initialize your static data
-            _staticData = new List<Menu>
-            {
-                new Menu { Id = 1, Name = "Home", Type="Navigation", IsActive=true  },
-                new Menu { Id = 2, Name = "Products", Type="drawer", IsActive=false }
-                // Add more data as needed
-            };
+            _menuRepo = menuRepo;
         }
 
         [HttpGet("[action]")]
-        public ActionResult<IEnumerable<MenuInfoModel>> GetMenuList()
+        public IActionResult GetMenuList()
         {
-
-            return Ok(_staticData);
+            var data = _menuRepo.GetMenuList();
+            if (data.Count() == 0)
+            {
+                return NotFound();
+            }
+            return Ok(data);
         }
     }
      

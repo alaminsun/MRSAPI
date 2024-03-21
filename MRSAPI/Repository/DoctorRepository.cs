@@ -726,6 +726,67 @@ namespace MRSAPI.Repository
 
         }
 
+        public async Task<bool> DoctorAddRequest(AddDoctorRequestModel model)
+        {
+            bool isTrue = false;
+            try
+            {
+
+                string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
+                string OperationType = "Add Doctor";
+                mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
+
+                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,REMARK,CREATED_DATETIME,STATUS )" +
+                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.Remarkes + "', " +
+                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status.ToUpper() + "')";
+
+
+                if (_dbHelper.CmdExecute(qry) > 0)
+                {
+                    isTrue = true;
+                    model.Id = mxSl;
+                }
+
+                if (model.doctorInfoModels != null)
+                {
+
+                    foreach (var detailModel in model.doctorInfoModels)
+                    {
+                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_DOCTORS");
+                        string query1 = "Insert Into OPERATION_DOCTORS(ID,OPERATION_MASTER_ID,DOCTOR_ID) Values(" + Sl + "," + mxSl + ",'" + detailModel.DoctorId + "')";
+                        //string query1 = "Delete From OPERATION_DOCTORS Where DOCTOR_ID = '" + detailModel.DoctorId + "'";
+
+                        if (_dbHelper.CmdExecute(query1) > 0)
+                        {
+                            isTrue = true;
+                        }
+                        //DeleteMarketWithDocotor(model);
+                    }
+                }
+                if (model.supervisorInfoModels != null)
+                {
+
+                    foreach (var detailModel in model.supervisorInfoModels)
+                    {
+                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
+                        string query2 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,CREATED_DATETIME)" +
+                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
+
+                        if (_dbHelper.CmdExecute(query2) > 0)
+                        {
+                            isTrue = true;
+                        }
+                    }
+                }
+                //model.Id = mxSl;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return isTrue;
+        }
         public async Task<bool> DoctorDeleteMarket(DoctorDeleteRequestModel model)
         {
             bool isTrue = false;
@@ -787,65 +848,65 @@ namespace MRSAPI.Repository
             }
             return isTrue;
         }
-        //public async Task<bool> DoctorLinkWithMarket(DoctorLinkRequestModel model)
-        //{
-        //    bool isTrue = false;
-        //    try
-        //    {
+        public async Task<bool> DoctorLinkWithMarket(DoctorLinkRequestModel model)
+        {
+            bool isTrue = false;
+            try
+            {
 
-        //        string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
-        //        string OperationType = "Link Doctor";
-        //        mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
+                string CreationDate = DateTime.Now.ToString("dd/MM/yyyy");
+                string OperationType = "Add Doctor";
+                mxSl = _iDGenerated.getMAXSL("ID", "OPERATIONS_MASTER");
 
-        //        string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,REMARK,CREATED_DATETIME,STATUS )" +
-        //            "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.Remarkes + "', " +
-        //            "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status.ToUpper() + "')";
+                string qry = "INSERT INTO OPERATIONS_MASTER (ID,EMPLOYEE_ID,MARKET_CODE,OPERATION_TYPE,REMARK,CREATED_DATETIME,STATUS )" +
+                    "VALUES(" + mxSl + ", '" + model.EmployeeId + "', '" + model.MarketCode + "', '" + OperationType + "','" + model.Remarkes + "', " +
+                    "(TO_DATE('" + CreationDate + "','dd-MM-yyyy')),'" + model.Status.ToUpper() + "')";
 
-        //        if (_dbHelper.CmdExecute(qry) > 0)
-        //        {
-        //            isTrue = true;
-        //            model.Id = mxSl;
-        //        }
+                if (_dbHelper.CmdExecute(qry) > 0)
+                {
+                    isTrue = true;
+                    model.Id = mxSl;
+                }
 
-        //        if (model.doctorInfoModels != null)
-        //        {
+                if (model.doctorInfoModels != null)
+                {
 
-        //            foreach (var detailModel in model.doctorInfoModels)
-        //            {
-        //                long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_DOCTORS");
-        //                string query1 = "Insert Into OPERATION_DOCTORS(ID,OPERATION_MASTER_ID,DOCTOR_ID) Values(" + Sl + "," + mxSl + ",'" + detailModel.DoctorId + "')";
+                    foreach (var detailModel in model.doctorInfoModels)
+                    {
+                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_DOCTORS");
+                        string query1 = "Insert Into OPERATION_DOCTORS(ID,OPERATION_MASTER_ID,DOCTOR_ID) Values(" + Sl + "," + mxSl + ",'" + detailModel.DoctorId + "')";
 
-        //                if (_dbHelper.CmdExecute(query1) > 0)
-        //                {
-        //                    isTrue = true;
-        //                }
-        //            }
-        //        }
-        //        if (model.supervisorInfoModels != null)
-        //        {
+                        if (_dbHelper.CmdExecute(query1) > 0)
+                        {
+                            isTrue = true;
+                        }
+                    }
+                }
+                if (model.supervisorInfoModels != null)
+                {
 
-        //            foreach (var detailModel in model.supervisorInfoModels)
-        //            {
-        //                long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
-        //                string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,EMPLOYEE_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,REMARKS,CREATED_DATETIME)" +
-        //                    " Values(" + Sl + "," + mxSl + ",'" + detailModel.EmployeeId + "','" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "','" + detailModel.Remarkes + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
+                    foreach (var detailModel in model.supervisorInfoModels)
+                    {
+                        long Sl = _iDGenerated.getMAXSL("ID", "OPERATION_SUPERVISORS");
+                        string query1 = "Insert Into OPERATION_SUPERVISORS(ID,OPERATION_MASTER_ID,TERITORY_CODE,MARKET_CODE,IS_SUPERVISOR,CREATED_DATETIME)" +
+                            " Values(" + Sl + "," + mxSl + ",'" + detailModel.TerritoryCode + "','" + detailModel.MarketCode + "','" + detailModel.IsSupervisor + "',(TO_DATE('" + CreationDate + "','dd-MM-yyyy')))";
 
-        //                if (_dbHelper.CmdExecute(query1) > 0)
-        //                {
-        //                    isTrue = true;
-        //                }
+                        if (_dbHelper.CmdExecute(query1) > 0)
+                        {
+                            isTrue = true;
+                        }
 
-        //            }
-        //        }
-        //        //model.Id = mxSl;
-        //    }
-        //    catch (Exception)
-        //    {
+                    }
+                }
+                //model.Id = mxSl;
+            }
+            catch (Exception)
+            {
 
-        //        throw;
-        //    }
-        //    return isTrue;
-        //}
+                throw;
+            }
+            return isTrue;
+        }
 
 
         public bool MarketExist(int id)
@@ -910,6 +971,21 @@ namespace MRSAPI.Repository
                                     }
                                 }
                                 if (operationType == "Shift Doctor")
+                                {
+                                    foreach (var doctor in DoctorShiftList)
+                                    {
+                                        //string queryMktDel = "Delete from DOC_MKT_DTL where DOC_MKT_MAS_SLNO in (select DOC_MKT_MAS_SLNO from DOC_MKT_MAS where DOCTOR_ID =" + doctor.DoctorId + ")";
+                                        string queryMktDel = "Delete from DOC_MKT_DTL where DOC_MKT_MAS_SLNO in (select DOC_MKT_MAS_SLNO from DOC_MKT_MAS where DOCTOR_ID = " + doctor.DoctorId + ") AND PRAC_MKT_CODE = '" + doctor.FromMarketCode + "'";
+                                        _dbHelper.CmdExecute(queryMktDel);
+
+                                        var DoctorDetailSl = _iDGenerated.getMAXSL("DOC_MKT_DTL_SLNO", "DOC_MKT_DTL");
+                                        long docMarketSlNo = GetDocMarketSlNoByDoctor(doctor);
+                                        string query1 = "Insert Into DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE " +
+                                                ",ENTRY_DATE) Values(" + DoctorDetailSl + "," + docMarketSlNo + ",'" + doctor.ToMarketCode + "',(TO_DATE('" + CurrentDate + "','dd-MM-yyyy')))";
+                                        _dbHelper.CmdExecute(query1);
+                                    }
+                                }
+                                if (operationType == "Add Doctor")
                                 {
                                     foreach (var doctor in DoctorShiftList)
                                     {
@@ -1169,10 +1245,41 @@ namespace MRSAPI.Repository
             return listData;
         }
 
+        private List<DoctorInformation> GetDoctorRequestListById(int id)
+        {
+            List<DoctorInformation> listData = new List<DoctorInformation>();
+            //string query = "Select OPERATION_MASTER_ID,DOCTOR_ID From OPERATION_DOCTORS Where OPERATION_MASTER_ID = " + id + "";
+            string query = "select D.DOCTOR_ID,D.HONORARIUM || ' ' || D.DOCTOR_NAME AS DOCTOR_NAME,D.DEGREE,DS.SPECIALIZATION from Doctor D " +
+                " left join DOCTOR_SPECIALIZATION DS on d.SPECIA_1ST_CODE = DS.SPECIALIZATION_CODE " +
+                " Where D.Doctor_ID in (Select DOCTOR_ID From OPERATION_DOCTORS Where OPERATION_MASTER_ID = " + id + ")";
+
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        DoctorInformation model = new DoctorInformation();
+                        model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
+                        model.DoctorName = reader["DOCTOR_NAME"].ToString();
+                        model.Degree = reader["DEGREE"].ToString();
+                        model.Specialization = reader["SPECIALIZATION"].ToString();
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
+        }
+
         private List<DoctorInfoModel> GetDoctorListById(int id)
         {
             List<DoctorInfoModel> listData = new List<DoctorInfoModel>();
             string query = "Select OPERATION_MASTER_ID,DOCTOR_ID From OPERATION_DOCTORS Where OPERATION_MASTER_ID = " + id + "";
+            //string query = "select D.DOCTOR_ID,D.HONORARIUM || ' ' || D.DOCTOR_NAME AS DOCTOR_NAME,D.DEGREE,DS.SPECIALIZATION from Doctor D " +
+            //    " left join DOCTOR_SPECIALIZATION DS on d.SPECIA_1ST_CODE = DS.SPECIALIZATION_CODE "+
+            //    " Where D.Doctor_ID in (Select DOCTOR_ID From OPERATION_DOCTORS Where OPERATION_MASTER_ID = " + id + ")";
 
             using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
             {
@@ -1184,7 +1291,9 @@ namespace MRSAPI.Repository
                     {
                         DoctorInfoModel model = new DoctorInfoModel();
                         model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
-                        //model.UpazilaName = reader["UPAZILA_NAME"].ToString();
+                        //model.DoctorName = reader["DOCTOR_NAME"].ToString();
+                        //model.Degree = reader["DEGREE"].ToString();
+                        //model.Specialization = reader["SPECIALIZATION"].ToString();
                         listData.Add(model);
                     }
                 }
@@ -1229,7 +1338,7 @@ namespace MRSAPI.Repository
                         model.ToMarketName = reader["To_Market_Name"].ToString();
                         model.Status = reader["STATUS"].ToString();
                         model.Remarkes = reader["REMARK"].ToString();
-                        model.DoctorList = GetDoctorListById(model.MstId);
+                        model.DoctorList = GetDoctorRequestListById(model.MstId);
                         model.TMList = GetTmInfoById(model.MstId, territoryCode);
 
                         listData.Add(model);

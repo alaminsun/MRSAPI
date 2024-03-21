@@ -28,6 +28,7 @@ builder.Services.AddScoped<IDGenerated>();
 //builder.Services.AddTransient<ISampleRepository,SampleRepository>();
 builder.Services.AddTransient<IDoctorRepository, DoctorRepository>();
 builder.Services.AddTransient<IInstitutionRepository, InstitutionRepository>();
+builder.Services.AddTransient<IMenuRepository, MenuRepository>();
 builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddApiVersioning(options =>
 {

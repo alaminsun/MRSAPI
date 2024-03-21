@@ -416,6 +416,53 @@ namespace MRSAPI.Controllers
         }
 
         [HttpPost("[action]")]
+        public async Task<IActionResult> DoctorAddRequest([FromBody] AddDoctorRequestDTO doctorAddRequestDTO)
+        {
+            try
+            {
+                if (doctorAddRequestDTO == null)
+                {
+                    return BadRequest(ModelState);
+                }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                int Code = 0;
+                var obj = new AddDoctorRequestModel
+                {
+                    EmployeeId = doctorAddRequestDTO.EmployeeId,
+                    Id = Code,
+                    MarketCode = doctorAddRequestDTO.MarketCode,
+                    //FromMarket = doctorShiftRequestDTO.FromMarket,
+                    //ToMarket = doctorShiftRequestDTO.ToMarket,
+                    Remarkes = doctorAddRequestDTO.Remarkes,
+                    Status = doctorAddRequestDTO.Status,
+                    doctorInfoModels = doctorAddRequestDTO.doctorInfoModels,
+                    supervisorInfoModels = doctorAddRequestDTO.supervisorInfoModels
+
+                    // Map other properties manually if needed
+                };
+                if (!await _doctorRepo.DoctorAddRequest(obj))
+                {
+                    ModelState.AddModelError("", $"Something went wrong when save the record");
+                    return StatusCode(500, ModelState);
+                }
+                return Ok(new { Message = "Data saved successfully.", obj.Id, obj });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you may want to log it to a file or another storage)
+                Console.WriteLine(ex.Message);
+
+                // Return a 500 Internal Server Error response
+                return StatusCode(500, new { Message = "An error occurred while saving the data." });
+            }
+        }
+
+
+
+        [HttpPost("[action]")]
         public async Task<IActionResult> DoctorDeleteRequest([FromBody] DoctorDeleteRequestDTO doctorShiftRequestDTO)
         {
             try
@@ -460,50 +507,50 @@ namespace MRSAPI.Controllers
             }
         }
 
-        //[HttpPost("[action]")]
-        //public async Task<IActionResult> DoctorLinkRequest([FromBody] DoctorLinkRequestDTO doctorLinkRequestDTO)
-        //{
-        //    try
-        //    {
-        //        if (doctorLinkRequestDTO == null)
-        //        {
-        //            return BadRequest(ModelState);
-        //        }
-        //        if (!ModelState.IsValid)
-        //        {
-        //            return BadRequest(ModelState);
-        //        }
-        //        int Code = 0;
-        //        var obj = new DoctorLinkRequestModel
-        //        {
-        //            EmployeeId = doctorLinkRequestDTO.EmployeeId,
-        //            Id = Code,
-        //            MarketCode = doctorLinkRequestDTO.MarketCode,
-        //            //FromMarket = doctorShiftRequestDTO.FromMarket,
-        //            //ToMarket = doctorShiftRequestDTO.ToMarket,
-        //            Remarkes = doctorLinkRequestDTO.Remarkes,
-        //            Status = doctorLinkRequestDTO.Status,
-        //            doctorInfoModels = doctorLinkRequestDTO.doctorInfoModels,
-        //            supervisorInfoModels = doctorLinkRequestDTO.supervisorInfoModels
+        [HttpPost("[action]")]
+        public async Task<IActionResult> DoctorLinkRequest([FromBody] DoctorLinkRequestDTO doctorLinkRequestDTO)
+        {
+            try
+            {
+                if (doctorLinkRequestDTO == null)
+                {
+                    return BadRequest(ModelState);
+                }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                int Code = 0;
+                var obj = new DoctorLinkRequestModel
+                {
+                    EmployeeId = doctorLinkRequestDTO.EmployeeId,
+                    Id = Code,
+                    MarketCode = doctorLinkRequestDTO.MarketCode,
+                    //FromMarket = doctorShiftRequestDTO.FromMarket,
+                    //ToMarket = doctorShiftRequestDTO.ToMarket,
+                    Remarkes = doctorLinkRequestDTO.Remarkes,
+                    Status = doctorLinkRequestDTO.Status,
+                    doctorInfoModels = doctorLinkRequestDTO.doctorInfoModels,
+                    supervisorInfoModels = doctorLinkRequestDTO.supervisorInfoModels
 
-        //            // Map other properties manually if needed
-        //        };
-        //        if (!await _doctorRepo.DoctorLinkWithMarket(obj))
-        //        {
-        //            ModelState.AddModelError("", $"Something went wrong when save the record");
-        //            return StatusCode(500, ModelState);
-        //        }
-        //        return Ok(new { Message = "Data saved successfully.", obj.Id, obj });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log the exception (you may want to log it to a file or another storage)
-        //        Console.WriteLine(ex.Message);
+                    // Map other properties manually if needed
+                };
+                if (!await _doctorRepo.DoctorLinkWithMarket(obj))
+                {
+                    ModelState.AddModelError("", $"Something went wrong when save the record");
+                    return StatusCode(500, ModelState);
+                }
+                return Ok(new { Message = "Data saved successfully.", obj.Id, obj });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you may want to log it to a file or another storage)
+                Console.WriteLine(ex.Message);
 
-        //        // Return a 500 Internal Server Error response
-        //        return StatusCode(500, new { Message = "An error occurred while saving the data." });
-        //    }
-        //}
+                // Return a 500 Internal Server Error response
+                return StatusCode(500, new { Message = "An error occurred while saving the data." });
+            }
+        }
 
         //[HttpPut("[action]")]
         //public async Task<IActionResult> TMReponseOnRequest([FromBody] TMRponsesOnRequest model)
@@ -557,10 +604,10 @@ namespace MRSAPI.Controllers
         public IActionResult GetMPORequest(string territoryCode)
         {
             var data = _doctorRepo.GetMPODeadRequestByTMId(territoryCode);
-            //if (data.Count() == 0)
-            //{
-            //    return NotFound();
-            //}
+            if (data.Count() == 0)
+            {
+                return NotFound();
+            }
             return Ok(data);
         }
         //[HttpGet("[action]/{territoryCode}")]
@@ -616,7 +663,6 @@ namespace MRSAPI.Controllers
                     TerritoryCode = tMRponsesOnRequest.TerritoryCode,
                     MstId = tMRponsesOnRequest.MstId,
                     TMResponses = tMRponsesOnRequest.TMResponsesDTOs
-
 
                     // Map other properties manually if needed
                 };

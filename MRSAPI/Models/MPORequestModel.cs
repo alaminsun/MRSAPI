@@ -14,7 +14,7 @@ namespace MRSAPI.Models
         public string ToMarketName { get; set; }
         public string Status { get; set; }
         public string Remarkes { get; set; }
-        public List<DoctorInfoModel> DoctorList { get; set; }
+        public List<DoctorInformation> DoctorList { get; set; }
         public List<LinkTMModel> TMList { get; set; }
 
     }
