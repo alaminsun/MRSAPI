@@ -5,6 +5,7 @@ using MRSAPI.Data;
 using MRSAPI.Gateway;
 using MRSAPI.Helpers;
 using MRSAPI.Models;
+using MRSAPI.Models.DTO;
 using MRSAPI.Repository.IRepository;
 using Oracle.ManagedDataAccess.Client;
 using System.Collections;
@@ -520,9 +521,9 @@ namespace MRSAPI.Repository
 
                 var ip = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
                 string CurrentDate = DateTime.Now.ToString("dd/MM/yyyy");
-                mxSl = _iDGenerated.getMAXSL("DOCTOR_ID", "DOCTOR Where DOCTOR_ID not in (900000)");
+                mxSl = _iDGenerated.getMAXSL("DOCTOR_ID", "TEMP_DOCTOR Where DOCTOR_ID not in (900000)");
 
-                string qry = "INSERT INTO DOCTOR (DOCTOR_ID,REGISTRATION_NO,POTENTIAL_CATEGORY,DOCTOR_NAME,DEGREE,DEGREE_CODE,DESIGNATION_CODE,SPECIA_1ST_CODE,GENDER,RELIGION,DATE_OF_BIRTH,DOC_PERS_PHONE, " +
+                string qry = "INSERT INTO TEMP_DOCTOR (DOCTOR_ID,REGISTRATION_NO,POTENTIAL_CATEGORY,DOCTOR_NAME,DEGREE,DEGREE_CODE,DESIGNATION_CODE,SPECIA_1ST_CODE,GENDER,RELIGION,DATE_OF_BIRTH,DOC_PERS_PHONE, " +
                                  "DOCTOR_EMAIL,PATIENT_PER_DAY,AVG_PRESC_VALUE,ADDRESS1,REMARKS,ENTERED_BY,ENTERED_DATE,ENTERED_TERMINAL)" +
                     "VALUES(" + mxSl + ", '" + model.RegistrationNo + "', '" + model.PotentialCategory + "', '" + model.DoctorName + "','" + model.DegreeTitle + "', " +
                     "'" + model.DegreeCode + "','" + model.DesignationCode + "','" + model.SpecializationCode + "'," +
@@ -538,8 +539,8 @@ namespace MRSAPI.Repository
 
                 if (model.DoctorMarketDetailsModels != null)
                 {
-                    long DoctorMstSl = _iDGenerated.getMAXSL("DOC_MKT_MAS_SLNO", "DOC_MKT_MAS");
-                    string query = "Insert into DOC_MKT_MAS(DOC_MKT_MAS_SLNO,DOCTOR_ID)values(" + DoctorMstSl + "," + mxSl + ")";
+                    long DoctorMstSl = _iDGenerated.getMAXSL("DOC_MKT_MAS_SLNO", "TEMP_DOC_MKT_MAS");
+                    string query = "Insert into TEMP_DOC_MKT_MAS(DOC_MKT_MAS_SLNO,DOCTOR_ID)values(" + DoctorMstSl + "," + mxSl + ")";
 
                     if (_dbHelper.CmdExecute(query) > 0)
                     {
@@ -548,8 +549,8 @@ namespace MRSAPI.Repository
 
                     foreach (var detailModel in model.DoctorMarketDetailsModels)
                     {
-                        long DoctorDetailSl = _iDGenerated.getMAXSL("DOC_MKT_DTL_SLNO", "DOC_MKT_DTL");
-                        string query1 = "Insert Into DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE,SBU_UNIT, " +
+                        long DoctorDetailSl = _iDGenerated.getMAXSL("DOC_MKT_DTL_SLNO", "TEMP_DOC_MKT_DTL");
+                        string query1 = "Insert Into TEMP_DOC_MKT_DTL(DOC_MKT_DTL_SLNO,DOC_MKT_MAS_SLNO,PRAC_MKT_CODE,SBU_UNIT, " +
                                 " UPAZILA_CODE,MDP_LOC_CODE,EDP_LOC_CODE,INSTI_CODE,ENTRY_DATE,DISTC_CODE) Values(" + DoctorDetailSl + "," + DoctorMstSl + ",'" + detailModel.MarketCode + "','" + detailModel.SBUUnit + "', " +
                                 "'" + detailModel.UpazilaCode + "','" + detailModel.MorningLocName + "','" + detailModel.EveningLocName + "','" + detailModel.InstituteCode + "'," +
                                 "(TO_DATE('" + CurrentDate + "','dd/MM/yyyy')),'" + detailModel.DistrictCode + "')";
@@ -563,8 +564,8 @@ namespace MRSAPI.Repository
                 {
                     foreach (DoctorInSBU detail in model.DoctorInSBUs)
                     {
-                        long DoctorSBUId = _iDGenerated.getMAXSL("DOCTOR_SBU_ID", "DOC_MARKET_SBU");
-                        string query2 = "Insert into DOC_MARKET_SBU(DOCTOR_SBU_ID,DOCTOR_ID,MARKET_CODE,SBU_UNIT) Values(" + DoctorSBUId + "," + mxSl + ",'" + detail.MarketCode + "','" + detail.SBUUnit + "')";
+                        long DoctorSBUId = _iDGenerated.getMAXSL("DOCTOR_SBU_ID", "TEMP_DOC_MARKET_SBU");
+                        string query2 = "Insert into TEMP_DOC_MARKET_SBU(DOCTOR_SBU_ID,DOCTOR_ID,MARKET_CODE,SBU_UNIT) Values(" + DoctorSBUId + "," + mxSl + ",'" + detail.MarketCode + "','" + detail.SBUUnit + "')";
                         if (_dbHelper.CmdExecute(query2) > 0)
                         {
                             isTrue = true;
@@ -987,8 +988,9 @@ namespace MRSAPI.Repository
                                 }
                                 if (operationType == "Add Doctor")
                                 {
-                                    foreach (var doctor in DoctorShiftList)
+                                    foreach (var doctor in DoctorList)
                                     {
+                                        object doctorInfo = GetDoctorInfoByRequest(doctor.DoctorId);
                                         //string queryMktDel = "Delete from DOC_MKT_DTL where DOC_MKT_MAS_SLNO in (select DOC_MKT_MAS_SLNO from DOC_MKT_MAS where DOCTOR_ID =" + doctor.DoctorId + ")";
                                         string queryMktDel = "Delete from DOC_MKT_DTL where DOC_MKT_MAS_SLNO in (select DOC_MKT_MAS_SLNO from DOC_MKT_MAS where DOCTOR_ID = " + doctor.DoctorId + ") AND PRAC_MKT_CODE = '" + doctor.FromMarketCode + "'";
                                         _dbHelper.CmdExecute(queryMktDel);
@@ -1000,7 +1002,7 @@ namespace MRSAPI.Repository
                                         _dbHelper.CmdExecute(query1);
                                     }
                                 }
-                            }
+                            } 
 
 
                             var status = detailModel.ApprovalStatus == "APR" ? "Approved" : "Rejected";
@@ -1019,6 +1021,113 @@ namespace MRSAPI.Repository
                 throw;
             }
             return isTrue;
+        }
+
+        private DoctorMarketRelationDTO GetDoctorInfoByRequest(long DoctorId)
+        {
+            DoctorMarketRelationDTO model = new DoctorMarketRelationDTO();
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                //string query = "Select * from OPERATIONS_MASTER Where ID = " + doctor + "";
+                string query = "Select DOCTOR_ID, REGISTRATION_NO, POTENTIAL_CATEGORY, HONORARIUM, DOCTOR_NAME, DEGREE, DEGREE_CODE, DESIGNATION, DESIGNATION_CODE, SPECIA_1ST_CODE, SPECIA_2ND_CODE, " +
+                               " GENDER, RELIGION, DATE_OF_BIRTH, DOC_PERS_PHONE, DOCTOR_EMAIL, PATIENT_PER_DAY, AVG_PRESC_VALUE, PRESC_SHARE, ADDRESS1, ADDRESS2, ADDRESS3, ADDRESS4, REMARKS, ENTERED_BY, ENTERED_DATE, ENTERED_TERMINAL, UPDATED_BY," +
+                               " UPDATED_DATE, UPDATED_TERMINAL, DESIG_CODE_BAK From TEMP_DOCTOR Where Doctor_ID IN(SELECT DOCTOR_ID FROM OPERATION_DOCTORS WHERE DOCTOR_ID = "+ DoctorId + ")";
+                //long doctor_Id = 0;
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        //model.DoctorMstSl = Convert.ToInt64(reader["DOCTOR_ID"]);
+                        model.DoctorId = Convert.ToInt64(reader["DOCTOR_ID"]);
+                        model.DoctorName = reader["DOCTOR_NAME"].ToString();
+                        model.RegistrationNo = reader["REGISTRATION_NO"].ToString();
+                        model.Gender = reader["GENDER"].ToString();
+                        //model.OperationType = reader["OPERATION_TYPE"].ToString();
+                        model.Religion = reader["RELIGION"].ToString();
+                        model.DateOfBirth = reader["DATE_OF_BIRTH"].ToString();
+                        model.personalContactNumber = reader["DOC_PERS_PHONE"].ToString();
+                        //model.chamberContactNumber = reader["REMARK"].ToString();
+                        model.SpecializationCode = reader["SPECIA_1ST_CODE"].ToString();
+                        model.PotentialCategory = reader["POTENTIAL_CATEGORY"].ToString();
+                        model.PatientNoPerDay = Convert.ToInt32(reader["PATIENT_PER_DAY"]);
+                        model.ValuePerPrescription = Convert.ToInt32(reader["AVG_PRESC_VALUE"]);
+                        model.Address = reader["ADDRESS1"].ToString();
+                        model.DesignationCode = reader["DESIGNATION_CODE"].ToString();
+                        model.DegreeTitle = reader["DEGREE"].ToString();
+                        model.DegreeCode = reader["DEGREE_CODE"].ToString();
+                        model.Remarks = reader["REMARKS"].ToString();
+                        model.DoctorMarketDetailsModels = GetMarketDetailInfoByDoctorId(model.DoctorId);
+                        model.DoctorInSBUs = GetSBUByDoctorId(model.DoctorId);
+                        //model.doctorInfoModels = GetDoctorListById(id);
+                        //model.supervisorInfoModels = GetSupervisorInfoById(id);
+                    }
+
+                }
+            }
+            return model;
+        }
+
+        private List<DoctorInSBUDTO> GetSBUByDoctorId(long doctorId)
+        {
+            List<DoctorInSBUDTO> listData = new List<DoctorInSBUDTO>();
+            //string query = "Select ID,FROM_MARKET From OPERATIONS_MASTER Where ID = " + mstId + "";
+            string query = "Select TS.DOCTOR_SBU_ID, TS.DOCTOR_ID, TS.MARKET_CODE,TS.SBU_UNIT From TEMP_DOC_MARKET_SBU TS ,TEMP_DOC_MKT_MAS TM \r\nWhere TS.DOCTOR_ID = TM.DOCTOR_ID AND TM.DOCTOR_ID="+ doctorId + " ";
+
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        DoctorInSBUDTO model = new DoctorInSBUDTO();
+
+                        model.DoctorId = Convert.ToInt32(reader["DOCTOR_ID"]);
+                        model.DoctorSBUId = Convert.ToInt32(reader["DOCTOR_SBU_ID"]);
+                        model.MarketCode = reader["MARKET_CODE"].ToString();
+                        model.SBUUnit = reader["SBU_UNIT"].ToString();
+                        //model.ToMarketCode = reader["TO_MARKET"].ToString();
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
+        }
+
+        private List<DoctorMarketDetailsDTO>? GetMarketDetailInfoByDoctorId(long doctorId)
+        {
+            List<DoctorMarketDetailsDTO> listData = new List<DoctorMarketDetailsDTO>();
+            //string query = "Select ID,FROM_MARKET From OPERATIONS_MASTER Where ID = " + mstId + "";
+            string query = "Select TM.DOC_MKT_MAS_SLNO, TD.DOC_MKT_DTL_SLNO, TM.DOCTOR_ID, TD.PRAC_MKT_CODE,TD.INSTI_CODE,TD.UPAZILA_CODE,\r\nTD.DISTC_CODE,TD.MDP_LOC_NAME,TD.EDP_LOC_NAME,TD.SBU_Unit From TEMP_DOC_MKT_MAS TM, TEMP_DOC_MKT_DTL TD\r\nWhere TM.DOC_MKT_MAS_SLNO = TD.DOC_MKT_MAS_SLNO And TM.DOCTOR_ID=" + doctorId + "";
+
+            using (OracleConnection con = new OracleConnection(_db.GetConnectionString()))
+            {
+                OracleCommand cmd = new OracleCommand(query, con);
+                con.Open();
+                using (OracleDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        DoctorMarketDetailsDTO model = new DoctorMarketDetailsDTO();
+                        model.DoctorMstSl = Convert.ToInt64(reader["DOC_MKT_MAS_SLNO"]);
+                        model.DoctorDetailSl = Convert.ToInt64(reader["DOC_MKT_DTL_SLNO"]);
+                        model.DoctorId = Convert.ToInt64(reader["DOCTOR_ID"]);
+                        model.MarketCode = reader["PRAC_MKT_CODE"].ToString();
+                        model.InstituteCode = reader["INSTI_CODE"].ToString();
+                        model.UpazilaCode = reader["UPAZILA_CODE"].ToString();
+                        model.DistrictCode = reader["DISTC_CODE"].ToString();
+                        model.MorningLocName = reader["MDP_LOC_NAME"].ToString();
+                        model.EveningLocName = reader["EDP_LOC_NAME"].ToString();
+                        model.SBUUnit = reader["SBU_Unit"].ToString();
+                        
+                        listData.Add(model);
+                    }
+                }
+            }
+            return listData;
         }
 
         private string GetSupervisorData(long mstId, string territoryCode)

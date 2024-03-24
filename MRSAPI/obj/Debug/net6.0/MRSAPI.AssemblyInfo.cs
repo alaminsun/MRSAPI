@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MRSAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0364e5a548289849cac0c083d7db310d7628439b")]
 [assembly: System.Reflection.AssemblyProductAttribute("MRSAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MRSAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

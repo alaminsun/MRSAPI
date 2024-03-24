@@ -293,7 +293,7 @@ namespace MRSAPI.Controllers
                     Religion = doctorInformationAPIDTO.DoctorMasterModels.Religion,
                     DateOfBirth = doctorInformationAPIDTO.DoctorMasterModels.DateOfBirth,
                     personalContactNumber = doctorInformationAPIDTO.DoctorMasterModels.personalContactNumber,
-                    chamberContactNumber = doctorInformationAPIDTO.DoctorMasterModels.chamberContactNumber,
+                    //chamberContactNumber = doctorInformationAPIDTO.DoctorMasterModels.chamberContactNumber,
                     Email = doctorInformationAPIDTO.DoctorMasterModels.Email,
                     SpecializationCode = doctorInformationAPIDTO.DoctorMasterModels.SpecializationCode,
                     PotentialCategory = doctorInformationAPIDTO.DoctorMasterModels.PotentialCategory,

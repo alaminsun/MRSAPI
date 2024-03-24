@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MRSAPI.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace MRSAPI.Models.DTO
 {
@@ -8,6 +9,8 @@ namespace MRSAPI.Models.DTO
         public string EmployeeId { get; set; }
 
         public DoctorMaster DoctorMasterModels { get; set; }
+
+       
 
     }
 }

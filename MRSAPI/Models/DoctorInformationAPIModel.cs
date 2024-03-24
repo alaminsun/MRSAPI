@@ -19,7 +19,7 @@ namespace MRSAPI.Models
         [CustomDateFormat("dd-MM-yyyy")]
         public string DateOfBirth { get; set; }
         public string? personalContactNumber { get; set; }
-        public string? chamberContactNumber { get; set; }
+        //public string? chamberContactNumber { get; set; }
         public string? Email { get; set; }
         public string? SpecializationCode { get; set; }
         public string PotentialCategory { get; set; }
